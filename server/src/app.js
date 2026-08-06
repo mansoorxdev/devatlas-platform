@@ -2,59 +2,56 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import requestLogger from './middlewares/request-logger.middleware.js';
+import apiLimiter from './middlewares/rate-limiter.middleware.js';
+import errorHandler from './middlewares/error.middleware.js';
+import routes from './routes/index.js';
+import healthRoutes from './routes/health.routes.js';
+import AppError from '#utils/app-error.js';
+import config from '#config/env.config.js';
 
 const app = express();
 
-// Global Middlewares
+// Disable x-powered-by header to prevent Express fingerprinting
+app.disable('x-powered-by');
+
+// Trust reverse proxy for rate limiting, secure cookies, etc. in production
+app.set('trust proxy', 1);
+
+// Global security headers
 app.use(helmet());
+
+// CORS configuration based on validated environment configuration
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
+  origin: config.CLIENT_URL,
+  credentials: true,
 }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// TODO: Add compression middleware (e.g., import compression from 'compression'; app.use(compression())) in a future phase
+
+// Request parsers with 1MB body size limits to prevent body-bloating denial of service attacks
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
-app.use(morgan('dev'));
 
-// Rate Limiter middleware
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  message: {
-    success: false,
-    error: {
-      code: 'TOO_MANY_REQUESTS',
-      message: 'Too many requests from this IP, please try again after 15 minutes.'
-    }
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api/', limiter);
+// Morgan HTTP request logging piped through Winston
+app.use(requestLogger);
 
-// Basic status check route
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    success: true,
-    data: {
-      status: 'healthy',
-      timestamp: new Date().toISOString()
-    }
-  });
+// Mount health check endpoint BEFORE rate limiting is applied to /api to ensure it remains exempt
+app.use('/api/v1/health', healthRoutes);
+
+// Rate limiting on API routes
+app.use('/api', apiLimiter);
+
+// Mount master API routes
+app.use('/api', routes);
+
+// Non-API routes 404 catch-all
+app.all('*', (req, res, next) => {
+  next(new AppError(`Endpoint not found: ${req.originalUrl}`, 404, 'NOT_FOUND'));
 });
 
-// Centralized error handling placeholder
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: {
-      code: err.code || 'INTERNAL_SERVER_ERROR',
-      message: err.message || 'An unexpected error occurred.'
-    }
-  });
-});
+// Centralized global error handling middleware
+app.use(errorHandler);
 
 export default app;

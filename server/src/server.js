@@ -1,25 +1,48 @@
-import dotenv from 'dotenv';
+import config from '#config/env.config.js';
 import app from './app.js';
+import logger from '#utils/logger.js';
 
-dotenv.config();
+const PORT = config.PORT;
+let server;
 
-const PORT = process.env.PORT || 5000;
-
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server is running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
-});
-
-// Handle unhandled rejections and exceptions
-process.on('unhandledRejection', (err) => {
-  console.error('Unhandled Rejection! Shutting down server...');
-  console.error(err.name, err.message);
-  server.close(() => {
-    process.exit(1);
-  });
-});
-
+// Register "uncaughtException" listener first to catch any errors during initialization
 process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception! Shutting down server...');
-  console.error(err.name, err.message);
+  logger.error('CRITICAL: Uncaught Exception! Shutting down...', err);
   process.exit(1);
+});
+
+// Reusable Graceful Shutdown Helper
+const gracefulShutdown = (signal, err) => {
+  if (err) {
+    logger.error(`CRITICAL: Server shutting down due to ${signal}...`, err);
+  } else {
+    logger.info(`Received ${signal}. Shutting down server gracefully...`);
+  }
+
+  if (server) {
+    server.close(() => {
+      logger.info('HTTP server closed successfully.');
+      process.exit(err ? 1 : 0);
+    });
+  } else {
+    process.exit(err ? 1 : 0);
+  }
+};
+
+// Start HTTP Server
+server = app.listen(PORT, () => {
+  logger.info(`🚀 Server successfully started in [${config.NODE_ENV}] mode on port [${PORT}]`);
+});
+
+// Register operational handlers for rejections and termination signals
+process.on('unhandledRejection', (err) => {
+  gracefulShutdown('unhandledRejection', err);
+});
+
+process.on('SIGTERM', () => {
+  gracefulShutdown('SIGTERM');
+});
+
+process.on('SIGINT', () => {
+  gracefulShutdown('SIGINT');
 });

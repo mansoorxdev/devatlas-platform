@@ -1,0 +1,13 @@
+import express from 'express';
+import AppError from '#utils/app-error.js';
+
+const router = express.Router();
+
+// API version 1 routes (health check is mounted directly in app.js to bypass rate limiting)
+
+// Match any other route that falls into the API router path and throw 404 AppError
+router.all('*', (req, res, next) => {
+  next(new AppError(`API endpoint '${req.originalUrl}' not found.`, 404, 'NOT_FOUND'));
+});
+
+export default router;
