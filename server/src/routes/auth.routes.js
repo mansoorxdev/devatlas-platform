@@ -19,4 +19,10 @@ router.get(
   asyncWrapper(authController.getMe.bind(authController))
 );
 
+// Mount token refresh rotation endpoint
+router.post('/refresh', asyncWrapper(authController.refresh.bind(authController)));
+
+// Mount logout endpoint
+router.post('/logout', asyncWrapper(authController.logout.bind(authController)));
+
 export default router;

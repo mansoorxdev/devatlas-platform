@@ -29,3 +29,23 @@ export const verifyAccessToken = (token) => {
 export const decodeAccessToken = (token) => {
   return jwt.decode(token);
 };
+
+/**
+ * Generate a refresh token (JWT) signed with the config refresh secret.
+ * @param {object} payload - Payloads like { id } to sign.
+ * @returns {string} Signed JWT Refresh Token.
+ */
+export const generateRefreshToken = (payload) => {
+  return jwt.sign(payload, config.JWT_REFRESH_SECRET, {
+    expiresIn: config.JWT_REFRESH_EXPIRES_IN,
+  });
+};
+
+/**
+ * Verify refresh token (JWT) using the config refresh secret.
+ * @param {string} token - Signed JWT Refresh Token.
+ * @returns {object} Decoded and validated token payload.
+ */
+export const verifyRefreshToken = (token) => {
+  return jwt.verify(token, config.JWT_REFRESH_SECRET);
+};
