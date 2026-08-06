@@ -9,6 +9,13 @@ export class UserRepository {
   }
 
   /**
+   * Find a user by ID
+   */
+  async findById(id) {
+    return User.findById(id);
+  }
+
+  /**
    * Create a new user record
    */
   async create(userData) {

@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken';
 import userRepository from '#repositories/user.repository.js';
 import AppError from '#utils/app-error.js';
-import config from '#config/env.config.js';
+import { generateAccessToken } from '#utils/jwt.js';
 
 export class AuthService {
   /**
@@ -30,10 +29,8 @@ export class AuthService {
       role: user.role,
     };
 
-    // Generate token utilizing configured secret and expiration
-    const token = jwt.sign(payload, config.JWT_SECRET, {
-      expiresIn: config.JWT_EXPIRES_IN,
-    });
+    // Generate token utilizing reusable JWT utility helper
+    const token = generateAccessToken(payload);
 
     return {
       user,

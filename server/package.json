@@ -16,7 +16,8 @@
     "#repositories/*": "./src/repositories/*",
     "#controllers/*": "./src/controllers/*",
     "#validators/*": "./src/validators/*",
-    "#middlewares/*": "./src/middlewares/*"
+    "#middlewares/*": "./src/middlewares/*",
+    "#constants/*": "./src/constants/*"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
