@@ -1,6 +1,7 @@
 import config from '#config/env.config.js';
 import app from './app.js';
 import logger from '#utils/logger.js';
+import { connectDB } from './config/db.js';
 
 const PORT = config.PORT;
 let server;
@@ -29,7 +30,9 @@ const gracefulShutdown = (signal, err) => {
   }
 };
 
-// Start HTTP Server
+// Connect to database then start HTTP Server
+await connectDB();
+
 server = app.listen(PORT, () => {
   logger.info(`🚀 Server successfully started in [${config.NODE_ENV}] mode on port [${PORT}]`);
 });

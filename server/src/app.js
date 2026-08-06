@@ -44,7 +44,7 @@ app.use('/api/v1/health', healthRoutes);
 app.use('/api', apiLimiter);
 
 // Mount master API routes
-app.use('/api', routes);
+app.use('/api/v1', routes);
 
 // Non-API routes 404 catch-all
 app.all('*', (req, res, next) => {
