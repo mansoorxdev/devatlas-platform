@@ -10,6 +10,7 @@ import GuestRoute from '../features/auth/components/GuestRoute.jsx';
 // Lazy-loaded page components
 const HomePage = lazy(() => import('../pages/HomePage'));
 const ArticlesPage = lazy(() => import('../pages/ArticlesPage'));
+const ArticleDetailPage = lazy(() => import('../pages/ArticleDetailPage'));
 const SnippetsPage = lazy(() => import('../pages/SnippetsPage'));
 const DevToolsPage = lazy(() => import('../pages/DevToolsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
@@ -39,6 +40,10 @@ export function AppRoutes() {
         {
           path: 'articles',
           element: withSuspense(ArticlesPage),
+        },
+        {
+          path: 'articles/:slug',
+          element: withSuspense(ArticleDetailPage),
         },
         {
           path: 'snippets',
