@@ -1,19 +1,24 @@
 import express from 'express';
-import AppError from '#utils/app-error.js';
 import authRoutes from './auth.routes.js';
 import articleRoutes from './article.routes.js';
 import snippetRoutes from './snippet.routes.js';
+import errorRoutes from './error.routes.js';
 
 const router = express.Router();
 
-// API version 1 routes (health check is mounted directly in app.js to bypass rate limiting)
+// Health Check
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'DevAtlas API Server is healthy and running.',
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Mounting Sub-Routers
 router.use('/auth', authRoutes);
 router.use('/articles', articleRoutes);
 router.use('/snippets', snippetRoutes);
-
-// Match any other route that falls into the API router path and throw 404 AppError
-router.all('*', (req, res, next) => {
-  next(new AppError(`API endpoint '${req.originalUrl}' not found.`, 404, 'NOT_FOUND'));
-});
+router.use('/errors', errorRoutes);
 
 export default router;
