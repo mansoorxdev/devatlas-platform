@@ -14,6 +14,7 @@ const ArticleDetailPage = lazy(() => import('../pages/ArticleDetailPage'));
 const SnippetsPage = lazy(() => import('../pages/SnippetsPage'));
 const SnippetDetailPage = lazy(() => import('../pages/SnippetDetailPage'));
 const ErrorsPage = lazy(() => import('../pages/ErrorsPage'));
+const ErrorDetailPage = lazy(() => import('../pages/ErrorDetailPage'));
 const DevToolsPage = lazy(() => import('../pages/DevToolsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
@@ -62,6 +63,10 @@ export function AppRoutes() {
         {
           path: 'errors',
           element: withSuspense(ErrorsPage),
+        },
+        {
+          path: 'errors/:slug',
+          element: withSuspense(ErrorDetailPage),
         },
         {
           path: 'devtools',
