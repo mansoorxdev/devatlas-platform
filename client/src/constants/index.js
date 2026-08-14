@@ -4,12 +4,16 @@ export const APP_PATHS = {
   ARTICLES: '/articles',
   ARTICLE_DETAIL: '/articles/:slug',
   SNIPPETS: '/snippets',
+  SNIPPET_DETAIL: '/snippets/:slug',
   DEVTOOLS: '/devtools',
   ERRORS: '/errors',
   ADMIN: '/portal-master',
   ADMIN_ARTICLES: '/portal-master/articles',
   ADMIN_ARTICLE_NEW: '/portal-master/articles/new',
   ADMIN_ARTICLE_EDIT: '/portal-master/articles/:id/edit',
+  ADMIN_SNIPPETS: '/portal-master/snippets',
+  ADMIN_SNIPPET_NEW: '/portal-master/snippets/new',
+  ADMIN_SNIPPET_EDIT: '/portal-master/snippets/:id/edit',
 };
 
 export const API_ENDPOINTS = {

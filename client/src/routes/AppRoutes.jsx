@@ -17,6 +17,7 @@ const LoginPage = lazy(() => import('../pages/LoginPage'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
+const AdminSnippetsPage = lazy(() => import('../pages/AdminSnippetsPage'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Suspense component wrapper
@@ -91,6 +92,10 @@ export function AppRoutes() {
         {
           path: 'articles/:id/edit',
           element: withSuspense(AdminArticleEditorPage),
+        },
+        {
+          path: 'snippets',
+          element: withSuspense(AdminSnippetsPage),
         },
       ],
     },
