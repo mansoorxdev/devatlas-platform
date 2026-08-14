@@ -104,7 +104,7 @@ export function AdminErrorEditorPage() {
     fetchErrorSolution();
   }, [id, isEditMode]);
 
-  // Code Fix Live Statistics
+  // Code Fix Live Statistics (UI Calculation Only)
   const codeStats = {
     lines: codeFix ? codeFix.split('\n').length : 0,
     chars: codeFix.length,
@@ -170,20 +170,33 @@ export function AdminErrorEditorPage() {
   };
 
   // Handle Form Submission (Save Draft or Publish)
-  const handleSubmit = async (targetStatus) => {
+  const handleSubmit = async (actionType) => {
     if (!validateForm()) return;
 
     setIsSubmitting(true);
     setGlobalError(null);
 
+    // Determine status:
+    // If actionType === 'draft' -> status = 'draft'
+    // If actionType === 'publish' -> status = 'published'
+    // If actionType === 'save' -> preserve existing status (published if was published, draft if was draft)
+    let targetStatus = 'draft';
+    if (actionType === 'publish') {
+      targetStatus = 'published';
+    } else if (actionType === 'save') {
+      targetStatus = isEditMode ? initialError?.status || 'draft' : 'published';
+    } else if (actionType === 'draft') {
+      targetStatus = 'draft';
+    }
+
     const payload = {
       title: title.trim(),
-      errorMessage: errorMessage.trim(),
+      errorMessage,
       category,
       language,
-      cause: cause.trim(),
-      solution: solution.trim(),
-      codeFix: codeFix.trim(),
+      cause,
+      solution,
+      codeFix,
       tags,
       status: targetStatus,
     };
@@ -194,6 +207,8 @@ export function AdminErrorEditorPage() {
         await errorService.updateError(id, payload);
         if (targetStatus === 'published' && initialError?.status !== 'published') {
           await errorService.toggleErrorStatus(id, 'published');
+        } else if (targetStatus === 'draft' && initialError?.status === 'published') {
+          await errorService.toggleErrorStatus(id, 'draft');
         }
       } else {
         // Create new error solution
@@ -208,7 +223,20 @@ export function AdminErrorEditorPage() {
       navigate(APP_PATHS.ADMIN_ERRORS);
     } catch (err) {
       console.error('Failed to save error solution:', err);
-      setGlobalError(err.response?.data?.error?.message || 'Failed to save error solution. Please check your inputs.');
+      const apiErr = err.response?.data?.error;
+      if (apiErr?.code === 'VALIDATION_FAILED' && Array.isArray(apiErr.details)) {
+        const mappedErrors = {};
+        apiErr.details.forEach((d) => {
+          const fieldName = d.path?.[d.path.length - 1];
+          if (fieldName) {
+            mappedErrors[fieldName] = d.message;
+          }
+        });
+        setFieldErrors(mappedErrors);
+        setGlobalError('Please fix the highlighted validation errors above.');
+      } else {
+        setGlobalError(apiErr?.message || 'Failed to save error solution. Please check your inputs.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -272,7 +300,7 @@ export function AdminErrorEditorPage() {
 
                 <button
                   type="button"
-                  onClick={() => handleSubmit(initialError?.status === 'published' ? 'published' : 'published')}
+                  onClick={() => handleSubmit(isEditMode && initialError?.status === 'published' ? 'save' : 'publish')}
                   disabled={isSubmitting}
                   className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-500/20 transition-colors disabled:opacity-40 flex items-center gap-1.5 cursor-pointer"
                 >
@@ -593,11 +621,11 @@ export function AdminErrorEditorPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleSubmit('published')}
+                    onClick={() => handleSubmit('publish')}
                     disabled={isSubmitting}
                     className="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-500/20 transition-colors disabled:opacity-40 cursor-pointer"
                   >
-                    {isSubmitting ? 'Saving...' : 'Publish'}
+                    {isSubmitting ? 'Saving...' : isEditMode && initialError?.status === 'published' ? 'Save Changes' : 'Publish Solution'}
                   </button>
                 </div>
               </div>
