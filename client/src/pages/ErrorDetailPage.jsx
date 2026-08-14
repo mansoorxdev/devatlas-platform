@@ -191,14 +191,33 @@ export function ErrorDetailPage() {
   // Code Fix Line Numbers Generation
   const codeLines = codeFix ? codeFix.split('\n') : [];
 
+  // Dynamic SEO & Social Meta Variables
+  const metaTitle = `${title} | DevAtlas`;
+  const metaDescription = cause
+    ? `Fix ${title}: ${cause.substring(0, 150)}...`
+    : solution
+    ? `Fix ${title}: ${solution.substring(0, 150)}...`
+    : `Learn how to fix ${title} with step-by-step developer guide.`;
+
+  const canonicalUrl = `${window.location.origin}/errors/${slug}`;
+
   return (
     <>
       <Helmet>
-        <title>{title} - DevAtlas Error Solutions</title>
-        <meta
-          name="description"
-          content={`Learn how to fix ${title}: ${cause ? cause.substring(0, 150) : 'Step-by-step developer error resolution guide.'}`}
-        />
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content={metaTitle} />
+        <meta property="og:description" content={metaDescription} />
+        <meta property="og:type" content="article" />
+        <meta property="og:url" content={canonicalUrl} />
+
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={metaTitle} />
+        <meta name="twitter:description" content={metaDescription} />
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10">
@@ -331,8 +350,11 @@ export function ErrorDetailPage() {
               <div className="flex items-center justify-between gap-3 mb-4">
                 <div className="flex items-center gap-2">
                   <FileCode size={18} className="text-indigo-500" />
-                  <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                  <h2 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     Code Fix Example
+                    <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-bold">
+                      {languageDisplay}
+                    </span>
                   </h2>
                 </div>
 
