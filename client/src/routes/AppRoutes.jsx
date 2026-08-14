@@ -14,6 +14,7 @@ const SnippetsPage = lazy(() => import('../pages/SnippetsPage'));
 const DevToolsPage = lazy(() => import('../pages/DevToolsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
+const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Suspense component wrapper
@@ -72,6 +73,10 @@ export function AppRoutes() {
         {
           index: true,
           element: withSuspense(AdminDashboard),
+        },
+        {
+          path: 'articles',
+          element: withSuspense(AdminArticlesPage),
         },
       ],
     },

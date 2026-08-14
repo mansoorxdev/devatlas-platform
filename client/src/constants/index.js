@@ -2,10 +2,14 @@ export const APP_PATHS = {
   HOME: '/',
   LOGIN: '/portal-master/login',
   ARTICLES: '/articles',
+  ARTICLE_DETAIL: '/articles/:slug',
   SNIPPETS: '/snippets',
   DEVTOOLS: '/devtools',
   ERRORS: '/errors',
   ADMIN: '/portal-master',
+  ADMIN_ARTICLES: '/portal-master/articles',
+  ADMIN_ARTICLE_NEW: '/portal-master/articles/new',
+  ADMIN_ARTICLE_EDIT: '/portal-master/articles/:id/edit',
 };
 
 export const API_ENDPOINTS = {
