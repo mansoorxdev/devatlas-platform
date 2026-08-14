@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-brand-50: #f5f3ff;
   --color-brand-100: #ede9fe;
@@ -21,13 +23,7 @@
 }
 
 @layer base {
-  :root {
-    color-scheme: dark;
-  }
-
   body {
-    background-color: var(--color-dark-bg);
-    color: #f8fafc;
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

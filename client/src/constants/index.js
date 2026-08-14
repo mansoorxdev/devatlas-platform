@@ -1,11 +1,11 @@
 export const APP_PATHS = {
   HOME: '/',
-  LOGIN: '/login',
+  LOGIN: '/portal-master/login',
   ARTICLES: '/articles',
   SNIPPETS: '/snippets',
   DEVTOOLS: '/devtools',
   ERRORS: '/errors',
-  ADMIN: '/admin',
+  ADMIN: '/portal-master',
 };
 
 export const API_ENDPOINTS = {

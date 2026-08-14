@@ -48,8 +48,9 @@ export function AppRoutes() {
         },
       ],
     },
-    // Guest-only routes (redirect to /admin if already authenticated)
+    // Guest-only admin sign in route (redirect to /portal-master if already authenticated)
     {
+      path: 'portal-master',
       element: <GuestRoute />,
       children: [
         {
@@ -63,9 +64,9 @@ export function AppRoutes() {
         },
       ],
     },
-    // Protected admin routes (redirect to /login if not authenticated)
+    // Protected admin routes (redirect to /portal-master/login if not authenticated)
     {
-      path: 'admin',
+      path: 'portal-master',
       element: <ProtectedRoute />,
       children: [
         {

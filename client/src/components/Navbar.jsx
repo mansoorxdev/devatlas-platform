@@ -71,8 +71,8 @@ export function Navbar() {
               {isDark ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
             </button>
 
-            {/* Auth-aware action */}
-            {isAuthenticated ? (
+            {/* Render Admin Profile & Logout only when authenticated */}
+            {isAuthenticated && (
               <div className="flex items-center gap-3">
                 <Link
                   to={APP_PATHS.ADMIN}
@@ -89,13 +89,6 @@ export function Navbar() {
                   Logout
                 </button>
               </div>
-            ) : (
-              <Link
-                to={APP_PATHS.LOGIN}
-                className="px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-100 dark:text-slate-950 rounded-xl transition-all shadow-sm"
-              >
-                Sign In
-              </Link>
             )}
           </div>
 
@@ -138,8 +131,8 @@ export function Navbar() {
               </Link>
             ))}
 
-            {/* Auth-aware mobile action */}
-            {isAuthenticated ? (
+            {/* Render Admin Profile & Logout only when authenticated */}
+            {isAuthenticated && (
               <>
                 <Link
                   to={APP_PATHS.ADMIN}
@@ -157,14 +150,6 @@ export function Navbar() {
                   Logout
                 </button>
               </>
-            ) : (
-              <Link
-                to={APP_PATHS.LOGIN}
-                onClick={() => setIsOpen(false)}
-                className="w-full text-center px-4 py-2.5 font-semibold text-white bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-100 dark:text-slate-950 rounded-xl transition-all shadow-sm"
-              >
-                Sign In
-              </Link>
             )}
           </div>
         )}
