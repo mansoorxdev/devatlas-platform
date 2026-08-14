@@ -20,6 +20,7 @@ const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
 const AdminSnippetsPage = lazy(() => import('../pages/AdminSnippetsPage'));
 const AdminSnippetEditorPage = lazy(() => import('../pages/AdminSnippetEditorPage'));
+const AdminErrorsPage = lazy(() => import('../pages/AdminErrorsPage'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Suspense component wrapper
@@ -110,6 +111,10 @@ export function AppRoutes() {
         {
           path: 'snippets/:id/edit',
           element: withSuspense(AdminSnippetEditorPage),
+        },
+        {
+          path: 'errors',
+          element: withSuspense(AdminErrorsPage),
         },
       ],
     },

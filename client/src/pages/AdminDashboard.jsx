@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
   FileText,
   Code2,
+  AlertOctagon,
   Settings,
   ArrowRight,
   LogOut,
@@ -34,6 +35,14 @@ export function AdminDashboard() {
       icon: Code2,
       active: true,
       color: 'from-emerald-600 to-teal-600',
+    },
+    {
+      label: 'Error Solutions',
+      description: 'Manage developer crash fixes, stack trace resolutions, and debugging guides.',
+      path: APP_PATHS.ADMIN_ERRORS,
+      icon: AlertOctagon,
+      active: true,
+      color: 'from-rose-600 to-amber-600',
     },
     {
       label: 'Settings',
@@ -102,52 +111,56 @@ export function AdminDashboard() {
             </div>
 
             {/* Management Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {adminModules.map((item) => {
                 const IconComponent = item.icon;
                 return item.active ? (
                   <Link
                     key={item.label}
                     to={item.path}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand-500/50 dark:hover:border-brand-500/50 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all group cursor-pointer relative overflow-hidden"
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-brand-500/50 dark:hover:border-brand-500/50 rounded-2xl p-6 shadow-sm hover:shadow-lg transition-all group cursor-pointer relative overflow-hidden flex flex-col justify-between"
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-md`}>
-                        <IconComponent size={20} />
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.color} flex items-center justify-center text-white shadow-md`}>
+                          <IconComponent size={20} />
+                        </div>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
+                          Active Module
+                        </span>
                       </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-800">
-                        Active Module
-                      </span>
-                    </div>
 
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-brand-500 transition-colors flex items-center gap-1.5">
-                      {item.label}
-                      <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {item.description}
-                    </p>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1 group-hover:text-brand-500 transition-colors flex items-center gap-1.5">
+                        {item.label}
+                        <ArrowRight size={16} className="opacity-0 group-hover:opacity-100 transition-all -translate-x-1 group-hover:translate-x-0" />
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
                   </Link>
                 ) : (
                   <div
                     key={item.label}
-                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm opacity-75"
+                    className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm opacity-75 flex flex-col justify-between"
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className={`w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400`}>
-                        <IconComponent size={20} />
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className={`w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400`}>
+                          <IconComponent size={20} />
+                        </div>
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
+                          Coming Soon
+                        </span>
                       </div>
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 border border-slate-200 dark:border-slate-700">
-                        Coming Soon
-                      </span>
-                    </div>
 
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
-                      {item.label}
-                    </h3>
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      {item.description}
-                    </p>
+                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1">
+                        {item.label}
+                      </h3>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
                   </div>
                 );
               })}

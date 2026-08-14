@@ -7,6 +7,7 @@ export const APP_PATHS = {
   SNIPPET_DETAIL: '/snippets/:slug',
   DEVTOOLS: '/devtools',
   ERRORS: '/errors',
+  ERROR_DETAIL: '/errors/:slug',
   ADMIN: '/portal-master',
   ADMIN_ARTICLES: '/portal-master/articles',
   ADMIN_ARTICLE_NEW: '/portal-master/articles/new',
@@ -14,6 +15,9 @@ export const APP_PATHS = {
   ADMIN_SNIPPETS: '/portal-master/snippets',
   ADMIN_SNIPPET_NEW: '/portal-master/snippets/new',
   ADMIN_SNIPPET_EDIT: '/portal-master/snippets/:id/edit',
+  ADMIN_ERRORS: '/portal-master/errors',
+  ADMIN_ERROR_NEW: '/portal-master/errors/new',
+  ADMIN_ERROR_EDIT: '/portal-master/errors/:id/edit',
 };
 
 export const API_ENDPOINTS = {
@@ -26,6 +30,7 @@ export const API_ENDPOINTS = {
   },
   ARTICLES: '/articles',
   SNIPPETS: '/snippets',
+  ERRORS: '/errors',
 };
 
 export const STORAGE_KEYS = {
