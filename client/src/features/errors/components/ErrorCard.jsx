@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Copy,
   Check,
@@ -35,7 +35,8 @@ const LANGUAGE_LABELS = {
   yaml: 'YAML',
 };
 
-export function ErrorCard({ errorSolution }) {
+export function ErrorCard({ errorSolution, onTagClick }) {
+  const navigate = useNavigate();
   const [copied, setCopied] = useState(false);
 
   if (!errorSolution) return null;
@@ -78,6 +79,17 @@ export function ErrorCard({ errorSolution }) {
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy code fix:', err);
+    }
+  };
+
+  // Handle Tag Click
+  const handleTagClickInternal = (e, tag) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onTagClick) {
+      onTagClick(tag);
+    } else {
+      navigate(`/errors?tag=${encodeURIComponent(tag)}&page=1`);
     }
   };
 
@@ -161,12 +173,13 @@ export function ErrorCard({ errorSolution }) {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 mb-4">
             {tags.slice(0, 4).map((tag) => (
-              <span
+              <button
                 key={tag}
-                className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[11px] font-medium"
+                onClick={(e) => handleTagClickInternal(e, tag)}
+                className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950 hover:text-brand-600 dark:hover:text-brand-300 text-slate-600 dark:text-slate-400 text-[11px] font-medium transition-colors cursor-pointer"
               >
                 #{tag}
-              </span>
+              </button>
             ))}
             {tags.length > 4 && (
               <span className="text-[11px] text-slate-400 font-medium self-center">

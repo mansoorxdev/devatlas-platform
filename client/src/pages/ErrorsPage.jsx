@@ -11,6 +11,7 @@ import {
   RefreshCw,
   X,
   SlidersHorizontal,
+  Tag,
 } from 'lucide-react';
 import { errorService, ErrorCard } from '@features/errors';
 import Container from '@components/Container';
@@ -55,13 +56,15 @@ export function ErrorsPage() {
   const [errorsList, setErrorsList] = useState([]);
   const [pagination, setPagination] = useState({ page: currentPage, limit: 9, total: 0, pages: 1 });
   const [searchInput, setSearchInput] = useState(currentSearch);
+  const [tagInput, setTagInput] = useState(currentTag);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Sync search input if URL changes directly
+  // Sync search & tag inputs if URL changes directly
   useEffect(() => {
     setSearchInput(currentSearch);
-  }, [currentSearch]);
+    setTagInput(currentTag);
+  }, [currentSearch, currentTag]);
 
   // Helper to update URL search parameters
   const updateQueryParams = (newParams) => {
@@ -118,19 +121,32 @@ export function ErrorsPage() {
     updateQueryParams({ search: searchInput.trim(), page: '1' });
   };
 
+  // Tag submission handler
+  const handleTagSubmit = (e) => {
+    e.preventDefault();
+    const formatted = tagInput.trim().toLowerCase().replace(/^#/, '');
+    updateQueryParams({ tag: formatted, page: '1' });
+  };
+
+  // Handle Card Tag Click
+  const handleCardTagClick = (tag) => {
+    updateQueryParams({ tag, page: '1' });
+  };
+
   // Clear all filters
   const handleClearFilters = () => {
     setSearchInput('');
+    setTagInput('');
     setSearchParams({});
   };
 
   return (
     <>
       <Helmet>
-        <title>Developer Error Solutions & Crash Fixes - DevAtlas</title>
+        <title>Error Solutions | DevAtlas</title>
         <meta
           name="description"
-          content="Find verified fixes for developer error logs, stack trace exceptions, build failures, and configuration problems."
+          content="DevAtlas provides practical solutions and verified fixes for developer errors, exceptions, build failures, and configuration issues."
         />
       </Helmet>
 
@@ -317,7 +333,7 @@ export function ErrorsPage() {
             // 3-Column Responsive Error Cards Grid
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {errorsList.map((item) => (
-                <ErrorCard key={item.id} errorSolution={item} />
+                <ErrorCard key={item.id} errorSolution={item} onTagClick={handleCardTagClick} />
               ))}
             </div>
           )}
