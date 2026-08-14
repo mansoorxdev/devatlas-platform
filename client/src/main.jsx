@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { ThemeProvider } from './context/ThemeProvider';
 import ErrorBoundary from './components/ErrorBoundary';
-import AppRoutes from './routes/AppRoutes';
+import App from './App';
 import './index.css';
 
 // Initialize TanStack Query Client with optimal defaults
@@ -38,7 +38,7 @@ createRoot(rootElement).render(
         <QueryClientProvider client={queryClient}>
           <ThemeProvider>
             <BrowserRouter>
-              <AppRoutes />
+              <App />
             </BrowserRouter>
           </ThemeProvider>
         </QueryClientProvider>

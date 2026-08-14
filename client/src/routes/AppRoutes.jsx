@@ -4,6 +4,8 @@ import MainLayout from '../layouts/MainLayout';
 import PublicLayout from '../layouts/PublicLayout';
 import ErrorLayout from '../layouts/ErrorLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ProtectedRoute from '../features/auth/components/ProtectedRoute.jsx';
+import GuestRoute from '../features/auth/components/GuestRoute.jsx';
 
 // Lazy-loaded page components
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -11,7 +13,7 @@ const ArticlesPage = lazy(() => import('../pages/ArticlesPage'));
 const SnippetsPage = lazy(() => import('../pages/SnippetsPage'));
 const DevToolsPage = lazy(() => import('../pages/DevToolsPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
-const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Suspense component wrapper
@@ -23,7 +25,7 @@ const withSuspense = (Component) => (
 
 export function AppRoutes() {
   const routes = [
-    // Main website shell layout routes
+    // Main website shell layout routes (public — no auth required)
     {
       path: '/',
       element: <MainLayout />,
@@ -46,24 +48,34 @@ export function AppRoutes() {
         },
       ],
     },
-    // Guest shell (Sign In / Register) layout routes
+    // Guest-only routes (redirect to /admin if already authenticated)
     {
-      path: '/',
-      element: <PublicLayout />,
+      element: <GuestRoute />,
       children: [
         {
-          path: 'login',
-          element: withSuspense(LoginPage),
+          element: <PublicLayout />,
+          children: [
+            {
+              path: 'login',
+              element: withSuspense(LoginPage),
+            },
+          ],
         },
+      ],
+    },
+    // Protected admin routes (redirect to /login if not authenticated)
+    {
+      path: 'admin',
+      element: <ProtectedRoute />,
+      children: [
         {
-          path: 'register',
-          element: withSuspense(RegisterPage),
+          index: true,
+          element: withSuspense(AdminDashboard),
         },
       ],
     },
     // Standalone Error views / 404 Catch-All layout routes
     {
-      path: '*',
       element: <ErrorLayout />,
       children: [
         {

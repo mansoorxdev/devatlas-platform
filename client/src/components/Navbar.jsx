@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Terminal } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Menu, X, Sun, Moon, Terminal, LogOut, User } from 'lucide-react';
 import { useTheme } from '../context/ThemeProvider';
+import { useAuthStore } from '@features/auth/store/useAuthStore.js';
 import { APP_PATHS } from '../constants';
 import Container from './Container';
 
@@ -9,6 +10,11 @@ export function Navbar() {
   const { isDark, toggleTheme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
 
   const navLinks = [
     { name: 'Articles', path: APP_PATHS.ARTICLES },
@@ -19,6 +25,12 @@ export function Navbar() {
   const toggleMenu = () => setIsOpen((prev) => !prev);
 
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = async () => {
+    setIsOpen(false);
+    await logout();
+    navigate(APP_PATHS.HOME, { replace: true });
+  };
 
   return (
     <nav className="border-b border-slate-200 dark:border-slate-900 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-200">
@@ -59,13 +71,32 @@ export function Navbar() {
               {isDark ? <Sun size={20} className="text-yellow-400" /> : <Moon size={20} />}
             </button>
 
-            {/* Login button */}
-            <Link
-              to={APP_PATHS.LOGIN}
-              className="px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-100 dark:text-slate-950 rounded-xl transition-all shadow-sm"
-            >
-              Sign In
-            </Link>
+            {/* Auth-aware action */}
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link
+                  to={APP_PATHS.ADMIN}
+                  className="flex items-center gap-1.5 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                >
+                  <User size={16} />
+                  {user?.name || 'Admin'}
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all cursor-pointer"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link
+                to={APP_PATHS.LOGIN}
+                className="px-4 py-2 text-sm font-semibold text-white bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-100 dark:text-slate-950 rounded-xl transition-all shadow-sm"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
 
           {/* Mobile Actions (Menu + Theme toggle) */}
@@ -106,13 +137,35 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            <Link
-              to={APP_PATHS.LOGIN}
-              onClick={() => setIsOpen(false)}
-              className="w-full text-center px-4 py-2.5 font-semibold text-white bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-100 dark:text-slate-950 rounded-xl transition-all shadow-sm"
-            >
-              Sign In
-            </Link>
+
+            {/* Auth-aware mobile action */}
+            {isAuthenticated ? (
+              <>
+                <Link
+                  to={APP_PATHS.ADMIN}
+                  onClick={() => setIsOpen(false)}
+                  className="text-base font-medium px-2 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 flex items-center gap-2"
+                >
+                  <User size={18} />
+                  {user?.name || 'Admin'} Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-center px-4 py-2.5 font-semibold rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <Link
+                to={APP_PATHS.LOGIN}
+                onClick={() => setIsOpen(false)}
+                className="w-full text-center px-4 py-2.5 font-semibold text-white bg-slate-900 dark:bg-slate-100 hover:bg-slate-800 dark:hover:bg-slate-200 text-slate-100 dark:text-slate-950 rounded-xl transition-all shadow-sm"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         )}
       </Container>
