@@ -13,6 +13,7 @@ import {
   writerCreateArticleSchema,
   writerUpdateArticleSchema,
   reviewActionSchema,
+  adminModerationSchema,
 } from '#validators/article.validator.js';
 
 const router = express.Router();
@@ -24,6 +25,12 @@ router.get(
   '/',
   validate(articleQuerySchema),
   asyncWrapper(articleController.getPublicArticles.bind(articleController))
+);
+
+// Get featured published articles
+router.get(
+  '/featured',
+  asyncWrapper(articleController.getFeaturedArticles.bind(articleController))
 );
 
 // Get single published article by slug
@@ -120,6 +127,51 @@ router.patch(
   authorizeAdmin,
   validate(reviewActionSchema),
   asyncWrapper(articleController.rejectArticle.bind(articleController))
+);
+
+// --- STEP 9 EDITORIAL MODERATION & PUBLISHING CONTROL ROUTES ---
+
+// Admin unpublish article
+router.patch(
+  '/admin/:id/unpublish',
+  authenticate,
+  authorizeAdmin,
+  validate(adminModerationSchema),
+  asyncWrapper(articleController.unpublishArticle.bind(articleController))
+);
+
+// Admin archive article
+router.patch(
+  '/admin/:id/archive',
+  authenticate,
+  authorizeAdmin,
+  validate(adminModerationSchema),
+  asyncWrapper(articleController.archiveArticle.bind(articleController))
+);
+
+// Admin restore article
+router.patch(
+  '/admin/:id/restore',
+  authenticate,
+  authorizeAdmin,
+  asyncWrapper(articleController.restoreArticle.bind(articleController))
+);
+
+// Admin toggle featured status
+router.patch(
+  '/admin/:id/feature',
+  authenticate,
+  authorizeAdmin,
+  validate(adminModerationSchema),
+  asyncWrapper(articleController.toggleFeaturedArticle.bind(articleController))
+);
+
+// Admin get revision history
+router.get(
+  '/admin/:id/history',
+  authenticate,
+  authorizeAdmin,
+  asyncWrapper(articleController.getArticleRevisionHistory.bind(articleController))
 );
 
 // --- PROTECTED ADMIN CRUD ROUTES ---

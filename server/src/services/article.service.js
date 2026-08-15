@@ -581,13 +581,27 @@ export class ArticleService {
       createdAt: new Date(),
     };
 
+    const revisionEntry = {
+      action: 'publish',
+      performedBy: adminId,
+      note: 'Article approved and published by administrator',
+      snapshot: {
+        title: article.title,
+        summary: article.summary,
+        category: article.category || 'Backend',
+        language: article.language || 'English',
+        status: 'published',
+      },
+      createdAt: new Date(),
+    };
+
     if (article.assignment) {
       await assignmentRepository.updateStatus(article.assignment._id || article.assignment, 'completed');
     }
 
     const updated = await articleRepository.updateById(id, {
       ...updateData,
-      $push: { reviewHistory: historyEntry },
+      $push: { reviewHistory: historyEntry, revisions: revisionEntry },
     });
 
     try {
@@ -691,6 +705,187 @@ export class ArticleService {
     } catch (e) {}
 
     return updated;
+  }
+
+  // --- STEP 9 EDITORIAL MODERATION & PUBLISHING CONTROL METHODS ---
+
+  /**
+   * Admin unpublishes an article (status: published -> unpublished).
+   * Excludes article from all public discovery immediately without deleting data.
+   */
+  async unpublishArticle(id, adminId, note = '') {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    if (article.status !== 'published') {
+      throw new AppError('Only published articles can be unpublished.', 400, 'INVALID_STATE_TRANSITION');
+    }
+
+    const revisionEntry = {
+      action: 'unpublish',
+      performedBy: adminId,
+      note: note.trim() || 'Article unpublished by administrator.',
+      snapshot: {
+        title: article.title,
+        summary: article.summary,
+        category: article.category || 'Backend',
+        language: article.language || 'English',
+        status: 'unpublished',
+      },
+      createdAt: new Date(),
+    };
+
+    const updated = await articleRepository.updateById(id, {
+      status: 'unpublished',
+      isFeatured: false,
+      featuredAt: null,
+      $push: { revisions: revisionEntry },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Admin archives an article.
+   */
+  async archiveArticle(id, adminId, note = '') {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    if (article.status === 'archived') {
+      return article;
+    }
+
+    const revisionEntry = {
+      action: 'archive',
+      performedBy: adminId,
+      note: note.trim() || 'Article archived by administrator.',
+      snapshot: {
+        title: article.title,
+        summary: article.summary,
+        category: article.category || 'Backend',
+        language: article.language || 'English',
+        status: 'archived',
+      },
+      createdAt: new Date(),
+    };
+
+    const updated = await articleRepository.updateById(id, {
+      status: 'archived',
+      isFeatured: false,
+      featuredAt: null,
+      $push: { revisions: revisionEntry },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Admin restores an archived or unpublished article to draft.
+   */
+  async restoreArticle(id, adminId) {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    if (article.status !== 'archived' && article.status !== 'unpublished') {
+      throw new AppError('Only archived or unpublished articles can be restored.', 400, 'INVALID_STATE_TRANSITION');
+    }
+
+    const revisionEntry = {
+      action: 'restore',
+      performedBy: adminId,
+      note: 'Article restored to draft status by administrator.',
+      snapshot: {
+        title: article.title,
+        summary: article.summary,
+        category: article.category || 'Backend',
+        language: article.language || 'English',
+        status: 'draft',
+      },
+      createdAt: new Date(),
+    };
+
+    const updated = await articleRepository.updateById(id, {
+      status: 'draft',
+      $push: { revisions: revisionEntry },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Admin toggles featured status on a published article.
+   */
+  async toggleFeaturedArticle(id, adminId, isFeatured) {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    const newFeaturedState = isFeatured !== undefined ? Boolean(isFeatured) : !article.isFeatured;
+
+    if (newFeaturedState && article.status !== 'published') {
+      throw new AppError('Only published articles can be featured.', 400, 'INVALID_STATE_TRANSITION');
+    }
+
+    const revisionEntry = {
+      action: newFeaturedState ? 'feature' : 'unfeature',
+      performedBy: adminId,
+      note: newFeaturedState ? 'Article set as featured' : 'Article removed from featured',
+      snapshot: {
+        title: article.title,
+        summary: article.summary,
+        category: article.category || 'Backend',
+        language: article.language || 'English',
+        status: article.status,
+      },
+      createdAt: new Date(),
+    };
+
+    const updated = await articleRepository.updateById(id, {
+      isFeatured: newFeaturedState,
+      featuredAt: newFeaturedState ? new Date() : null,
+      $push: { revisions: revisionEntry },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Fetch editorial revision history for an article with populated admin details.
+   */
+  async getArticleRevisionHistory(id) {
+    const Article = (await import('#models/article.model.js')).default;
+    const article = await Article.findById(id).populate('revisions.performedBy', 'name email avatar role');
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    return {
+      articleId: article.id,
+      title: article.title,
+      currentStatus: article.status,
+      revisions: article.revisions || [],
+    };
+  }
+
+  /**
+   * Public: Fetch featured published articles.
+   */
+  async getFeaturedArticles(query = {}) {
+    const { page = 1, limit = 6 } = query;
+    return articleRepository.findWithPagination({
+      filter: { status: 'published', isFeatured: true },
+      sort: { featuredAt: -1, publishedAt: -1 },
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
+    });
   }
 }
 

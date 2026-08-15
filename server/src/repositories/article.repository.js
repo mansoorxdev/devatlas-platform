@@ -30,6 +30,13 @@ export class ArticleRepository {
   }
 
   /**
+   * Find a published article by slug (Public view).
+   */
+  async findByPublishedSlug(slug) {
+    return await Article.findOne({ slug, status: 'published' }).populate('author', 'name bio avatar expertise socialLinks role');
+  }
+
+  /**
    * Find an existing article by author ID and case-insensitive title.
    */
   async findByAuthorAndTitle(authorId, title) {

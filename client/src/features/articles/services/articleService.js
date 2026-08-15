@@ -75,11 +75,59 @@ export const articleService = {
   },
 
   /**
+   * Get featured published articles.
+   */
+  async getFeaturedArticles(params = {}) {
+    const response = await apiClient.get(`${API_ENDPOINTS.ARTICLES}/featured`, { params });
+    return response.data;
+  },
+
+  /**
    * Delete an article by ID.
    * @param {string} id - Article ObjectId
    */
   async deleteArticle(id) {
     const response = await apiClient.delete(`${API_ENDPOINTS.ARTICLES}/${id}`);
+    return response.data;
+  },
+
+  /**
+   * Unpublish an article.
+   */
+  async unpublishArticle(id, note = '') {
+    const response = await apiClient.patch(`${API_ENDPOINTS.ARTICLES}/admin/${id}/unpublish`, { note });
+    return response.data;
+  },
+
+  /**
+   * Archive an article.
+   */
+  async archiveArticle(id, note = '') {
+    const response = await apiClient.patch(`${API_ENDPOINTS.ARTICLES}/admin/${id}/archive`, { note });
+    return response.data;
+  },
+
+  /**
+   * Restore an archived or unpublished article.
+   */
+  async restoreArticle(id) {
+    const response = await apiClient.patch(`${API_ENDPOINTS.ARTICLES}/admin/${id}/restore`);
+    return response.data;
+  },
+
+  /**
+   * Toggle featured status of an article.
+   */
+  async toggleFeatured(id, isFeatured) {
+    const response = await apiClient.patch(`${API_ENDPOINTS.ARTICLES}/admin/${id}/feature`, { isFeatured });
+    return response.data;
+  },
+
+  /**
+   * Get revision history of an article.
+   */
+  async getArticleRevisionHistory(id) {
+    const response = await apiClient.get(`${API_ENDPOINTS.ARTICLES}/admin/${id}/history`);
     return response.data;
   },
 };

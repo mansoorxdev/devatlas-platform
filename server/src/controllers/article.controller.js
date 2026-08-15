@@ -257,6 +257,94 @@ export class ArticleController {
       },
     });
   }
+
+  // --- STEP 9 EDITORIAL MODERATION & PUBLISHING CONTROL HANDLERS ---
+
+  /**
+   * Protected Admin endpoint: Unpublish an article.
+   */
+  async unpublishArticle(req, res) {
+    const adminId = req.user.id || req.user._id;
+    const note = req.body?.note || req.body?.unpublishNote || '';
+    const article = await articleService.unpublishArticle(req.params.id, adminId, note);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        article,
+      },
+    });
+  }
+
+  /**
+   * Protected Admin endpoint: Archive an article.
+   */
+  async archiveArticle(req, res) {
+    const adminId = req.user.id || req.user._id;
+    const note = req.body?.note || '';
+    const article = await articleService.archiveArticle(req.params.id, adminId, note);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        article,
+      },
+    });
+  }
+
+  /**
+   * Protected Admin endpoint: Restore an archived or unpublished article to draft.
+   */
+  async restoreArticle(req, res) {
+    const adminId = req.user.id || req.user._id;
+    const article = await articleService.restoreArticle(req.params.id, adminId);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        article,
+      },
+    });
+  }
+
+  /**
+   * Protected Admin endpoint: Toggle featured status of an article.
+   */
+  async toggleFeaturedArticle(req, res) {
+    const adminId = req.user.id || req.user._id;
+    const article = await articleService.toggleFeaturedArticle(req.params.id, adminId, req.body?.isFeatured);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        article,
+      },
+    });
+  }
+
+  /**
+   * Protected Admin endpoint: Get revision history of an article.
+   */
+  async getArticleRevisionHistory(req, res) {
+    const history = await articleService.getArticleRevisionHistory(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      data: history,
+    });
+  }
+
+  /**
+   * Public endpoint: Get featured published articles.
+   */
+  async getFeaturedArticles(req, res) {
+    const result = await articleService.getFeaturedArticles(req.query);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  }
 }
 
 export default new ArticleController();

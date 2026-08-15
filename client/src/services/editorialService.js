@@ -32,6 +32,46 @@ export const editorialService = {
     const response = await apiClient.patch(`/articles/admin/${id}/reject`, { reviewNote });
     return response.data;
   },
+
+  /**
+   * Unpublish an article.
+   */
+  async unpublishArticle(id, note = '') {
+    const response = await apiClient.patch(`/articles/admin/${id}/unpublish`, { note });
+    return response.data;
+  },
+
+  /**
+   * Archive an article.
+   */
+  async archiveArticle(id, note = '') {
+    const response = await apiClient.patch(`/articles/admin/${id}/archive`, { note });
+    return response.data;
+  },
+
+  /**
+   * Restore an archived or unpublished article.
+   */
+  async restoreArticle(id) {
+    const response = await apiClient.patch(`/articles/admin/${id}/restore`);
+    return response.data;
+  },
+
+  /**
+   * Toggle featured status of an article.
+   */
+  async toggleFeatured(id, isFeatured) {
+    const response = await apiClient.patch(`/articles/admin/${id}/feature`, { isFeatured });
+    return response.data;
+  },
+
+  /**
+   * Fetch revision history of an article.
+   */
+  async getRevisionHistory(id) {
+    const response = await apiClient.get(`/articles/admin/${id}/history`);
+    return response.data;
+  },
 };
 
 export default editorialService;

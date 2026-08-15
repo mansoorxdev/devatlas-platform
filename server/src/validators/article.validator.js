@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ALLOWED_CATEGORIES, ALLOWED_LANGUAGES } from '../constants/editorial.js';
 
 /**
  * Validator schema for creating an Article.
@@ -27,6 +28,22 @@ export const createArticleSchema = z.object({
       featuredImage: z.string().trim().optional().default(''),
       seoTitle: z.string().trim().max(200).optional().default(''),
       seoDescription: z.string().trim().max(300).optional().default(''),
+      category: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_CATEGORIES.includes(val), {
+          message: `Category must be one of: ${ALLOWED_CATEGORIES.join(', ')}`,
+        })
+        .optional()
+        .default('Backend'),
+      language: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_LANGUAGES.includes(val), {
+          message: `Language must be one of: ${ALLOWED_LANGUAGES.join(', ')}`,
+        })
+        .optional()
+        .default('English'),
       status: z
         .enum(['draft', 'published'], {
           errorMap: () => ({ message: "Status must be either 'draft' or 'published'" }),
@@ -39,7 +56,6 @@ export const createArticleSchema = z.object({
 
 /**
  * Validator schema for updating an Article.
- * Note: 'author' and 'slug' are excluded from update payload to preserve integrity.
  */
 export const updateArticleSchema = z.object({
   params: z.object({
@@ -69,6 +85,20 @@ export const updateArticleSchema = z.object({
       featuredImage: z.string().trim().optional(),
       seoTitle: z.string().trim().max(200).optional(),
       seoDescription: z.string().trim().max(300).optional(),
+      category: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_CATEGORIES.includes(val), {
+          message: `Category must be one of: ${ALLOWED_CATEGORIES.join(', ')}`,
+        })
+        .optional(),
+      language: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_LANGUAGES.includes(val), {
+          message: `Language must be one of: ${ALLOWED_LANGUAGES.join(', ')}`,
+        })
+        .optional(),
       status: z
         .enum(['draft', 'published'], {
           errorMap: () => ({ message: "Status must be either 'draft' or 'published'" }),
@@ -88,11 +118,16 @@ export const articleQuerySchema = z.object({
       limit: z.string().optional().transform((val) => (val ? Math.min(50, Math.max(1, parseInt(val, 10) || 10)) : 10)),
       search: z.string().trim().optional(),
       tag: z.string().trim().toLowerCase().optional(),
-      status: z.enum(['draft', 'pending_review', 'changes_requested', 'rejected', 'published', 'all']).optional(),
+      status: z
+        .enum(['draft', 'pending_review', 'changes_requested', 'rejected', 'published', 'unpublished', 'archived', 'all'])
+        .optional(),
       writer: z.string().optional(),
       category: z.string().optional(),
       language: z.string().optional(),
       isAssigned: z.enum(['true', 'false', 'all']).optional(),
+      isFeatured: z.enum(['true', 'false', 'all']).optional(),
+      startDate: z.string().optional(),
+      endDate: z.string().optional(),
       sort: z.string().optional(),
     })
     .passthrough(),
@@ -107,7 +142,7 @@ export const toggleStatusSchema = z.object({
   }),
   body: z
     .object({
-      status: z.enum(['draft', 'published', 'pending_review', 'changes_requested', 'rejected'], {
+      status: z.enum(['draft', 'published', 'pending_review', 'changes_requested', 'rejected', 'unpublished', 'archived'], {
         errorMap: () => ({ message: 'Invalid article status' }),
       }),
     })
@@ -116,7 +151,6 @@ export const toggleStatusSchema = z.object({
 
 /**
  * Validator schema for Writer article creation.
- * Strictly prevents client status/author injection.
  */
 export const writerCreateArticleSchema = z.object({
   body: z
@@ -141,8 +175,22 @@ export const writerCreateArticleSchema = z.object({
       featuredImage: z.string().trim().optional().default(''),
       seoTitle: z.string().trim().max(200).optional().default(''),
       seoDescription: z.string().trim().max(300).optional().default(''),
-      category: z.string().trim().max(50).optional().default('Backend'),
-      language: z.string().trim().max(50).optional().default('English'),
+      category: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_CATEGORIES.includes(val), {
+          message: `Category must be one of: ${ALLOWED_CATEGORIES.join(', ')}`,
+        })
+        .optional()
+        .default('Backend'),
+      language: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_LANGUAGES.includes(val), {
+          message: `Language must be one of: ${ALLOWED_LANGUAGES.join(', ')}`,
+        })
+        .optional()
+        .default('English'),
       assignmentId: z.string().optional(),
       action: z
         .enum(['draft', 'submit'], {
@@ -156,7 +204,6 @@ export const writerCreateArticleSchema = z.object({
 
 /**
  * Validator schema for Writer article updates.
- * Allows action = 'draft' or 'submit' (or 'resubmit').
  */
 export const writerUpdateArticleSchema = z.object({
   params: z.object({
@@ -186,8 +233,20 @@ export const writerUpdateArticleSchema = z.object({
       featuredImage: z.string().trim().optional(),
       seoTitle: z.string().trim().max(200).optional(),
       seoDescription: z.string().trim().max(300).optional(),
-      category: z.string().trim().max(50).optional(),
-      language: z.string().trim().max(50).optional(),
+      category: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_CATEGORIES.includes(val), {
+          message: `Category must be one of: ${ALLOWED_CATEGORIES.join(', ')}`,
+        })
+        .optional(),
+      language: z
+        .string()
+        .trim()
+        .refine((val) => ALLOWED_LANGUAGES.includes(val), {
+          message: `Language must be one of: ${ALLOWED_LANGUAGES.join(', ')}`,
+        })
+        .optional(),
       assignmentId: z.string().optional(),
       action: z
         .enum(['draft', 'submit', 'resubmit'], {
@@ -199,8 +258,7 @@ export const writerUpdateArticleSchema = z.object({
 });
 
 /**
- * Validator schema for Admin review actions (Request Changes / Reject).
- * Requires reviewNote minimum 5 characters.
+ * Validator schema for Admin review actions.
  */
 export const reviewActionSchema = z.object({
   params: z.object({
@@ -213,6 +271,21 @@ export const reviewActionSchema = z.object({
         .min(5, 'Review feedback must be at least 5 characters')
         .max(1000, 'Review feedback cannot exceed 1000 characters')
         .trim(),
+    })
+    .strict(),
+});
+
+/**
+ * Validator schema for Admin moderation actions (unpublish, archive, restore, feature).
+ */
+export const adminModerationSchema = z.object({
+  params: z.object({
+    id: z.string({ required_error: 'Article ID parameter is required' }),
+  }),
+  body: z
+    .object({
+      note: z.string().trim().max(1000).optional().default(''),
+      isFeatured: z.boolean().optional(),
     })
     .strict(),
 });
