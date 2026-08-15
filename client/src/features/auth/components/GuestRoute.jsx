@@ -20,7 +20,7 @@ export function GuestRoute() {
   }
 
   if (isAuthenticated) {
-    const targetPath = user?.role === 'writer' ? APP_PATHS.WRITER : APP_PATHS.ADMIN;
+    const targetPath = user?.role === 'writer' ? APP_PATHS.WRITER_PORTAL : APP_PATHS.ADMIN;
     return <Navigate to={targetPath} replace />;
   }
 

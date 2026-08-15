@@ -5,7 +5,6 @@ import { useTheme } from '../context/ThemeProvider';
 import { useAuthStore } from '@features/auth/store/useAuthStore.js';
 import { APP_PATHS } from '../constants';
 import Container from './Container';
-import NotificationBell from './NotificationBell';
 
 export function Navbar() {
   const { isDark, toggleTheme } = useTheme();
@@ -65,8 +64,6 @@ export function Navbar() {
 
           {/* Right Actions */}
           <div className="hidden md:flex items-center gap-4">
-            <NotificationBell />
-
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"
@@ -77,34 +74,18 @@ export function Navbar() {
 
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
-                {['writer', 'admin'].includes(user?.role) && (
-                  <>
-                    <Link
-                      to={APP_PATHS.WRITER}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold hover:bg-brand-500/20 transition-colors"
-                    >
-                      <PenTool size={13} />
-                      <span>Writer Portal</span>
-                    </Link>
-                    <Link
-                      to={APP_PATHS.WRITER_ASSIGNMENTS}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <FileText size={13} className="text-brand-500" />
-                      <span>Assignments</span>
-                    </Link>
-                  </>
+                {user?.role === 'writer' && (
+                  <Link
+                    to={APP_PATHS.WRITER_PORTAL}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold hover:bg-brand-500/20 transition-colors"
+                  >
+                    <PenTool size={13} />
+                    <span>Writer Portal</span>
+                  </Link>
                 )}
 
                 {user?.role === 'admin' && (
                   <>
-                    <Link
-                      to={APP_PATHS.ADMIN_ASSIGNMENTS}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-500/20 transition-colors"
-                    >
-                      <FileText size={13} />
-                      <span>Briefs</span>
-                    </Link>
                     <Link
                       to={APP_PATHS.ADMIN_REVIEW_QUEUE}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
@@ -114,19 +95,11 @@ export function Navbar() {
                     </Link>
 
                     <Link
-                      to={APP_PATHS.ADMIN_WRITERS}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                    >
-                      <Users size={13} className="text-brand-500" />
-                      <span>Writers</span>
-                    </Link>
-
-                    <Link
                       to={APP_PATHS.ADMIN}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
                       <User size={13} className="text-brand-500" />
-                      <span>Admin</span>
+                      <span>Admin Portal</span>
                     </Link>
                   </>
                 )}
@@ -139,23 +112,7 @@ export function Navbar() {
                   <LogOut size={18} />
                 </button>
               </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  to={APP_PATHS.WRITER_LOGIN}
-                  className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
-                >
-                  Writer Sign In
-                </Link>
-                <Link
-                  to={APP_PATHS.WRITER_REGISTER}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-600 text-white text-xs font-semibold hover:bg-brand-500 transition-colors shadow-sm"
-                >
-                  <PenTool size={13} />
-                  <span>Become a Writer</span>
-                </Link>
-              </div>
-            )}
+            ) : null}
           </div>
 
           {/* Mobile Menu Button */}
@@ -193,15 +150,25 @@ export function Navbar() {
                 {link.name}
               </Link>
             ))}
-            {isAuthenticated ? (
+            {isAuthenticated && (
               <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                <Link
-                  to={APP_PATHS.ADMIN}
-                  onClick={() => setIsOpen(false)}
-                  className="text-xs font-semibold text-brand-500"
-                >
-                  Admin Dashboard
-                </Link>
+                {user?.role === 'writer' ? (
+                  <Link
+                    to={APP_PATHS.WRITER_PORTAL}
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs font-semibold text-brand-500"
+                  >
+                    Writer Portal
+                  </Link>
+                ) : (
+                  <Link
+                    to={APP_PATHS.ADMIN}
+                    onClick={() => setIsOpen(false)}
+                    className="text-xs font-semibold text-brand-500"
+                  >
+                    Admin Dashboard
+                  </Link>
+                )}
                 <button
                   onClick={handleLogout}
                   className="text-xs font-semibold text-rose-500"
@@ -209,14 +176,6 @@ export function Navbar() {
                   Logout
                 </button>
               </div>
-            ) : (
-              <Link
-                to={APP_PATHS.LOGIN}
-                onClick={() => setIsOpen(false)}
-                className="block py-2 text-sm font-medium text-slate-600 dark:text-slate-400"
-              >
-                Sign In
-              </Link>
             )}
           </div>
         )}

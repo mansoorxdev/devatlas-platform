@@ -25,7 +25,7 @@ export function WriterLoginPage() {
 
     try {
       await login(formData.email.trim(), formData.password);
-      navigate(APP_PATHS.WRITER, { replace: true });
+      navigate(APP_PATHS.WRITER_PORTAL, { replace: true });
     } catch (err) {
       const serverMessage = err.response?.data?.error?.message;
       if (err.response?.status === 403) {
@@ -43,6 +43,7 @@ export function WriterLoginPage() {
       <Helmet>
         <title>Writer Portal Sign In — DevAtlas</title>
         <meta name="description" content="Sign in to your DevAtlas Writer Portal to write articles, respond to editorial feedback, and track review status." />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-16 flex items-center justify-center">
@@ -116,8 +117,8 @@ export function WriterLoginPage() {
             {/* Footer Register Link */}
             <div className="text-center mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
               Don't have a writer account yet?{' '}
-              <Link to={APP_PATHS.WRITER_APPLY} className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
-                Apply as a Writer
+              <Link to={APP_PATHS.WRITER_PORTAL_APPLY} className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
+                Apply to become a contributor
               </Link>
             </div>
           </div>

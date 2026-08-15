@@ -35,7 +35,7 @@ export class AssignmentService {
         message: `You were assigned a new topic: "${assignment.title}".`,
         entityType: 'assignment',
         entityId: assignment._id,
-        link: '/writer/assignments',
+        link: '/writer-portal/assignments',
         eventId: `assign_${assignment._id}`,
       });
     } catch (e) {}
@@ -119,7 +119,7 @@ export class AssignmentService {
         message: `Assignment "${assignment.title}" has been cancelled by an admin.`,
         entityType: 'assignment',
         entityId: assignment.id,
-        link: '/writer/assignments',
+        link: '/writer-portal/assignments',
         eventId: `cancel_assign_${assignment.id}`,
       });
     } catch (e) {}

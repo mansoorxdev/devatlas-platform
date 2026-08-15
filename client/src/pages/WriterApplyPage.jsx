@@ -83,8 +83,10 @@ export function WriterApplyPage() {
     return (
       <>
         <Helmet>
-          <title>Application Submitted | DevAtlas Contributor Network</title>
-        </Helmet>
+        <title>Apply to Become a DevAtlas Writer — Contributor Onboarding</title>
+        <meta name="description" content="Apply to become an authorized DevAtlas technical writer. Submit your profile, bio, and expertise for editorial review." />
+        <meta name="robots" content="noindex, nofollow" />
+      </Helmet>
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-16">
           <Container className="max-w-2xl">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center shadow-lg space-y-6">
@@ -351,7 +353,7 @@ export function WriterApplyPage() {
 
             <div className="text-center pt-2">
               <span className="text-xs text-slate-500">Already an approved DevAtlas Writer? </span>
-              <Link to={APP_PATHS.WRITER_LOGIN} className="text-xs font-bold text-brand-600 hover:underline">
+              <Link to={APP_PATHS.WRITER_PORTAL_LOGIN} className="text-xs font-bold text-brand-600 hover:underline">
                 Sign in to Writer Portal
               </Link>
             </div>

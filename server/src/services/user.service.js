@@ -249,7 +249,7 @@ export class UserService {
         message: 'Congratulations! Your DevAtlas writer application has been approved. You may now log in to the Writer Portal.',
         entityType: 'user',
         entityId: user._id,
-        link: '/writer/login',
+        link: '/writer-portal/login',
         eventId: `application_approved_${user._id}`,
       });
     } catch (e) {}
@@ -287,7 +287,7 @@ export class UserService {
         message: `Your DevAtlas writer application was declined. Feedback: "${user.applicationNote}"`,
         entityType: 'user',
         entityId: user._id,
-        link: '/writer/apply',
+        link: '/writer-portal/apply',
         eventId: `application_rejected_${user._id}`,
       });
     } catch (e) {}

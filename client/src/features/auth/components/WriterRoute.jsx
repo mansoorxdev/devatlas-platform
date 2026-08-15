@@ -4,10 +4,12 @@ import LoadingSpinner from '../../../components/LoadingSpinner';
 import { APP_PATHS } from '../../../constants';
 
 /**
- * Route guard that protects Writer routes.
+ * Dedicated Route guard for Writer Portal routes (/writer-portal/*).
  * - While session is loading, renders a loading spinner.
- * - If not authenticated or not a writer/admin, redirects to login page.
- * - If authenticated as writer/admin, renders the child routes.
+ * - If unauthenticated, redirects to /writer-portal/login.
+ * - If authenticated as admin, redirects to /portal-master.
+ * - If authenticated as writer and status is approved & active, renders child routes.
+ * - If pending/rejected/deactivated writer, redirects to /writer-portal/login.
  */
 export function WriterRoute() {
   const isLoading = useAuthStore((state) => state.isLoading);
@@ -18,11 +20,23 @@ export function WriterRoute() {
     return <LoadingSpinner className="mt-20" size="lg" />;
   }
 
-  if (!isAuthenticated || !user || !['writer', 'admin'].includes(user.role)) {
-    return <Navigate to={APP_PATHS.LOGIN} replace />;
+  if (!isAuthenticated || !user) {
+    return <Navigate to={APP_PATHS.WRITER_PORTAL_LOGIN} replace />;
   }
 
-  return <Outlet />;
+  // Admins must remain isolated in Admin Portal (/portal-master)
+  if (user.role === 'admin') {
+    return <Navigate to={APP_PATHS.ADMIN} replace />;
+  }
+
+  // Enforce writer status & active state
+  if (user.role === 'writer') {
+    if (user.writerStatus === 'approved' && user.isActive !== false) {
+      return <Outlet />;
+    }
+  }
+
+  return <Navigate to={APP_PATHS.WRITER_PORTAL_LOGIN} replace />;
 }
 
 export default WriterRoute;

@@ -324,7 +324,7 @@ export class ArticleService {
           message: `Your article "${createdArticle.title}" has been submitted for editorial review.`,
           entityType: 'article',
           entityId: createdArticle.id,
-          link: '/writer/articles',
+          link: '/writer-portal/articles',
           eventId: `submit_writer_${createdArticle.id}_${createdArticle.createdAt?.getTime()}`,
         });
 
@@ -497,7 +497,7 @@ export class ArticleService {
         message: `Your article "${updated.title}" has been submitted for editorial review.`,
         entityType: 'article',
         entityId: updated.id,
-        link: '/writer/articles',
+        link: '/writer-portal/articles',
         eventId: `submit_writer_${updated.id}_${updated.updatedAt?.getTime()}`,
       });
 
@@ -656,7 +656,7 @@ export class ArticleService {
         message: `An admin requested revisions on "${article.title}": ${reviewNote}`,
         entityType: 'article',
         entityId: article.id,
-        link: `/writer/articles/${article.id}/edit`,
+        link: `/writer-portal/articles/${article.id}/edit`,
         eventId: `req_changes_${article.id}_${updated.updatedAt?.getTime()}`,
       });
     } catch (e) {}
@@ -699,7 +699,7 @@ export class ArticleService {
         message: `Your article "${article.title}" was not approved: ${reviewNote}`,
         entityType: 'article',
         entityId: article.id,
-        link: '/writer/articles',
+        link: '/writer-portal/articles',
         eventId: `reject_${article.id}`,
       });
     } catch (e) {}

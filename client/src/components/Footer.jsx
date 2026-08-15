@@ -11,8 +11,8 @@ export function Footer() {
             © {new Date().getFullYear()} DevAtlas. All rights reserved.
           </div>
           <div className="flex gap-6">
-            <Link to={APP_PATHS.WRITER_REGISTER} className="hover:text-brand-500 font-medium transition-colors">
-              Write for Us
+            <Link to={APP_PATHS.WRITER_PORTAL_LOGIN} className="hover:text-brand-500 font-medium transition-colors">
+              Writer Portal
             </Link>
             <Link to={APP_PATHS.TERMS} className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
               Terms of Use

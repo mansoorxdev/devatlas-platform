@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { useRoutes } from 'react-router-dom';
+import { useRoutes, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import PublicLayout from '../layouts/PublicLayout';
 import ErrorLayout from '../layouts/ErrorLayout';
@@ -7,6 +7,8 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import ProtectedRoute from '../features/auth/components/ProtectedRoute.jsx';
 import WriterRoute from '../features/auth/components/WriterRoute.jsx';
 import GuestRoute from '../features/auth/components/GuestRoute.jsx';
+
+const WriterPortalLayout = lazy(() => import('../layouts/WriterPortalLayout'));
 
 // Lazy-loaded page components
 const HomePage = lazy(() => import('../pages/HomePage'));
@@ -120,11 +122,11 @@ export function AppRoutes() {
     },
     // Guest-only Writer authentication routes
     {
-      path: 'writer',
+      path: 'writer-portal',
       element: <GuestRoute />,
       children: [
         {
-          element: <MainLayout />,
+          element: <PublicLayout />,
           children: [
             {
               path: 'login',
@@ -142,13 +144,13 @@ export function AppRoutes() {
         },
       ],
     },
-    // Protected Writer portal routes
+    // Protected Dedicated Writer Portal routes
     {
-      path: 'writer',
+      path: 'writer-portal',
       element: <WriterRoute />,
       children: [
         {
-          element: <MainLayout />,
+          element: withSuspense(WriterPortalLayout),
           children: [
             {
               index: true,
@@ -181,6 +183,15 @@ export function AppRoutes() {
           ],
         },
       ],
+    },
+    // Legacy /writer/* backward compatibility redirects
+    {
+      path: 'writer',
+      element: <Navigate to="/writer-portal" replace />,
+    },
+    {
+      path: 'writer/*',
+      element: <Navigate to="/writer-portal" replace />,
     },
     // Protected Admin routes (redirect to /portal-master/login if not authenticated)
     {
