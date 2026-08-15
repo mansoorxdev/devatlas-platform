@@ -1,5 +1,6 @@
 import assignmentRepository from '#repositories/assignment.repository.js';
 import userRepository from '#repositories/user.repository.js';
+import notificationService from '#services/notification.service.js';
 import AppError from '#utils/app-error.js';
 
 export class AssignmentService {
@@ -24,7 +25,22 @@ export class AssignmentService {
     };
 
     const assignment = await assignmentRepository.create(payload);
-    return assignmentRepository.findById(assignment._id);
+    const populated = await assignmentRepository.findById(assignment._id);
+
+    try {
+      await notificationService.notifyUser({
+        recipient: assignmentData.writer,
+        type: 'assignment_received',
+        title: 'New Content Brief Received',
+        message: `You were assigned a new topic: "${assignment.title}".`,
+        entityType: 'assignment',
+        entityId: assignment._id,
+        link: '/writer/assignments',
+        eventId: `assign_${assignment._id}`,
+      });
+    } catch (e) {}
+
+    return populated;
   }
 
   /**
@@ -92,7 +108,23 @@ export class AssignmentService {
       throw new AppError('Cannot cancel a completed assignment', 400, 'BAD_REQUEST');
     }
 
-    return assignmentRepository.updateStatus(id, 'cancelled');
+    const updated = await assignmentRepository.updateStatus(id, 'cancelled');
+
+    try {
+      const recipientId = assignment.writer?._id || assignment.writer;
+      await notificationService.notifyUser({
+        recipient: recipientId,
+        type: 'assignment_cancelled',
+        title: 'Content Assignment Cancelled',
+        message: `Assignment "${assignment.title}" has been cancelled by an admin.`,
+        entityType: 'assignment',
+        entityId: assignment.id,
+        link: '/writer/assignments',
+        eventId: `cancel_assign_${assignment.id}`,
+      });
+    } catch (e) {}
+
+    return updated;
   }
 
   /**

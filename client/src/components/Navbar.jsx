@@ -5,6 +5,7 @@ import { useTheme } from '../context/ThemeProvider';
 import { useAuthStore } from '@features/auth/store/useAuthStore.js';
 import { APP_PATHS } from '../constants';
 import Container from './Container';
+import NotificationBell from './NotificationBell';
 
 export function Navbar() {
   const { isDark, toggleTheme } = useTheme();
@@ -64,6 +65,8 @@ export function Navbar() {
 
           {/* Right Actions */}
           <div className="hidden md:flex items-center gap-4">
+            <NotificationBell />
+
             <button
               onClick={toggleTheme}
               className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 transition-colors cursor-pointer"

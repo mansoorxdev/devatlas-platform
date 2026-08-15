@@ -1,5 +1,6 @@
 import articleRepository from '#repositories/article.repository.js';
 import assignmentRepository from '#repositories/assignment.repository.js';
+import notificationService from '#services/notification.service.js';
 import AppError from '#utils/app-error.js';
 
 export class ArticleService {
@@ -291,6 +292,31 @@ export class ArticleService {
       await assignmentRepository.linkArticle(assignmentId, createdArticle._id, newAssignmentStatus);
     }
 
+    if (action === 'submit') {
+      try {
+        await notificationService.notifyUser({
+          recipient: writerId,
+          type: 'article_submitted',
+          title: 'Article Submitted for Review',
+          message: `Your article "${createdArticle.title}" has been submitted for editorial review.`,
+          entityType: 'article',
+          entityId: createdArticle.id,
+          link: '/writer/articles',
+          eventId: `submit_writer_${createdArticle.id}_${createdArticle.createdAt?.getTime()}`,
+        });
+
+        await notificationService.notifyAdmins({
+          type: createdArticle.assignment ? 'assigned_work_submitted' : 'writer_article_submitted',
+          title: createdArticle.assignment ? 'Assigned Work Submitted' : 'Writer Article Submitted',
+          message: `An article "${createdArticle.title}" was submitted for review.`,
+          entityType: 'article',
+          entityId: createdArticle.id,
+          link: '/portal-master/articles/review',
+          eventIdPrefix: `submit_admin_${createdArticle.id}_${createdArticle.createdAt?.getTime()}`,
+        });
+      } catch (e) {}
+    }
+
     return createdArticle;
   }
 
@@ -425,10 +451,37 @@ export class ArticleService {
       await assignmentRepository.updateStatus(article.assignment._id || article.assignment, 'submitted');
     }
 
-    return articleRepository.updateById(id, {
+    const updated = await articleRepository.updateById(id, {
       ...updateData,
       $push: { reviewHistory: historyEntry },
     });
+
+    // Idempotent Notifications
+    try {
+      await notificationService.notifyUser({
+        recipient: writerId,
+        type: 'article_submitted',
+        title: 'Article Submitted for Review',
+        message: `Your article "${updated.title}" has been submitted for editorial review.`,
+        entityType: 'article',
+        entityId: updated.id,
+        link: '/writer/articles',
+        eventId: `submit_writer_${updated.id}_${updated.updatedAt?.getTime()}`,
+      });
+
+      const adminType = isResubmit ? 'writer_article_resubmitted' : 'writer_article_submitted';
+      await notificationService.notifyAdmins({
+        type: updated.assignment ? 'assigned_work_submitted' : adminType,
+        title: updated.assignment ? 'Assigned Work Submitted' : 'Writer Article Submitted',
+        message: `An article "${updated.title}" was submitted for review.`,
+        entityType: 'article',
+        entityId: updated.id,
+        link: '/portal-master/articles/review',
+        eventIdPrefix: `submit_admin_${updated.id}_${updated.updatedAt?.getTime()}`,
+      });
+    } catch (e) {}
+
+    return updated;
   }
 
   /**
@@ -485,10 +538,26 @@ export class ArticleService {
       await assignmentRepository.updateStatus(article.assignment._id || article.assignment, 'completed');
     }
 
-    return articleRepository.updateById(id, {
+    const updated = await articleRepository.updateById(id, {
       ...updateData,
       $push: { reviewHistory: historyEntry },
     });
+
+    try {
+      const authorId = article.author?._id || article.author;
+      await notificationService.notifyUser({
+        recipient: authorId,
+        type: 'article_approved',
+        title: 'Article Approved & Published!',
+        message: `Congratulations! Your article "${article.title}" has been approved and published.`,
+        entityType: 'article',
+        entityId: article.id,
+        link: `/articles/${article.slug}`,
+        eventId: `approve_${article.id}`,
+      });
+    } catch (e) {}
+
+    return updated;
   }
 
   /**
@@ -512,10 +581,26 @@ export class ArticleService {
       createdAt: new Date(),
     };
 
-    return articleRepository.updateById(id, {
+    const updated = await articleRepository.updateById(id, {
       ...updateData,
       $push: { reviewHistory: historyEntry },
     });
+
+    try {
+      const authorId = article.author?._id || article.author;
+      await notificationService.notifyUser({
+        recipient: authorId,
+        type: 'changes_requested',
+        title: 'Admin Requested Changes',
+        message: `An admin requested revisions on "${article.title}": ${reviewNote}`,
+        entityType: 'article',
+        entityId: article.id,
+        link: `/writer/articles/${article.id}/edit`,
+        eventId: `req_changes_${article.id}_${updated.updatedAt?.getTime()}`,
+      });
+    } catch (e) {}
+
+    return updated;
   }
 
   /**
@@ -539,10 +624,26 @@ export class ArticleService {
       createdAt: new Date(),
     };
 
-    return articleRepository.updateById(id, {
+    const updated = await articleRepository.updateById(id, {
       ...updateData,
       $push: { reviewHistory: historyEntry },
     });
+
+    try {
+      const authorId = article.author?._id || article.author;
+      await notificationService.notifyUser({
+        recipient: authorId,
+        type: 'article_rejected',
+        title: 'Article Review Status: Rejected',
+        message: `Your article "${article.title}" was not approved: ${reviewNote}`,
+        entityType: 'article',
+        entityId: article.id,
+        link: '/writer/articles',
+        eventId: `reject_${article.id}`,
+      });
+    } catch (e) {}
+
+    return updated;
   }
 }
 

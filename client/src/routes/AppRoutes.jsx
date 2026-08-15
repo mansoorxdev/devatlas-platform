@@ -33,6 +33,7 @@ const WriterDashboardPage = lazy(() => import('../pages/WriterDashboardPage'));
 const WriterArticleEditorPage = lazy(() => import('../pages/WriterArticleEditorPage'));
 const WriterProfilePage = lazy(() => import('../pages/WriterProfilePage'));
 const WriterAssignmentsPage = lazy(() => import('../pages/WriterAssignmentsPage'));
+const NotificationsPage = lazy(() => import('../pages/NotificationsPage'));
 const AdminSnippetsPage = lazy(() => import('../pages/AdminSnippetsPage'));
 const AdminSnippetEditorPage = lazy(() => import('../pages/AdminSnippetEditorPage'));
 const AdminErrorsPage = lazy(() => import('../pages/AdminErrorsPage'));
@@ -156,6 +157,10 @@ export function AppRoutes() {
               element: withSuspense(WriterAssignmentsPage),
             },
             {
+              path: 'notifications',
+              element: withSuspense(NotificationsPage),
+            },
+            {
               path: 'articles',
               element: withSuspense(WriterDashboardPage),
             },
@@ -203,6 +208,10 @@ export function AppRoutes() {
         {
           path: 'writers/assignments',
           element: withSuspense(AdminAssignmentsPage),
+        },
+        {
+          path: 'notifications',
+          element: withSuspense(NotificationsPage),
         },
         {
           path: 'snippets',

@@ -7,6 +7,7 @@ import errorRoutes from './error.routes.js';
 import searchRoutes from './search.routes.js';
 import sitemapRoutes from './sitemap.routes.js';
 import assignmentRoutes from './assignment.routes.js';
+import notificationRoutes from './notification.routes.js';
 
 const router = express.Router();
 
@@ -28,5 +29,6 @@ router.use('/errors', errorRoutes);
 router.use('/search', searchRoutes);
 router.use('/sitemap.xml', sitemapRoutes);
 router.use('/assignments', assignmentRoutes);
+router.use('/notifications', notificationRoutes);
 
 export default router;

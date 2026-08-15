@@ -52,6 +52,20 @@ export class AuthService {
     const expiresAt = this.getRefreshTokenExpiry();
     await refreshTokenRepository.create(user._id, refreshToken, expiresAt);
 
+    // Trigger admin notification asynchronously
+    try {
+      const { default: notificationService } = await import('./notification.service.js');
+      await notificationService.notifyAdmins({
+        type: 'new_writer_registered',
+        title: 'New Writer Registered',
+        message: `Writer "${user.name}" registered on DevAtlas.`,
+        entityType: 'user',
+        entityId: user._id,
+        link: '/portal-master/writers',
+        eventIdPrefix: `register_writer_${user._id}`,
+      });
+    } catch (e) {}
+
     return {
       user,
       accessToken,
