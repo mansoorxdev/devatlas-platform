@@ -8,6 +8,7 @@ import {
   LatestSnippetsSection,
   LatestErrorsSection,
 } from '@/features/home';
+import { DevToolsShowcaseSection } from '@/features/devtools';
 import Container from '../components/Container';
 
 export function HomePage() {
@@ -174,6 +175,9 @@ export function HomePage() {
             error={errorsError}
             onRetry={fetchHomepageFeeds}
           />
+
+          {/* Step 3C-4: Developer Tools Showcase Section */}
+          <DevToolsShowcaseSection />
         </Container>
       </div>
     </>
