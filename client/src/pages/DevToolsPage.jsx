@@ -7,6 +7,8 @@ import {
   JsonFormatterTool,
   JwtDecoderTool,
   UuidGeneratorTool,
+  Base64Tool,
+  UrlEncoderTool,
 } from '@/features/devtools';
 
 export function DevToolsPage() {
@@ -29,6 +31,10 @@ export function DevToolsPage() {
     pageTitle = 'JWT Inspector & Decoder — DevAtlas Tools';
   } else if (selectedTool === 'uuid-generator') {
     pageTitle = 'UUID & Key Generator — DevAtlas Tools';
+  } else if (selectedTool === 'base64') {
+    pageTitle = 'Base64 Encoder / Decoder — DevAtlas Tools';
+  } else if (selectedTool === 'url-encoder') {
+    pageTitle = 'URL Encoder / Decoder — DevAtlas Tools';
   }
 
   return (
@@ -52,8 +58,14 @@ export function DevToolsPage() {
           ) : selectedTool === 'uuid-generator' ? (
             /* Active Tool 3: UUID & Key Generator */
             <UuidGeneratorTool onBackToHub={handleBackToHub} />
+          ) : selectedTool === 'base64' ? (
+            /* Active Tool 4: Base64 Encoder / Decoder */
+            <Base64Tool onBackToHub={handleBackToHub} />
+          ) : selectedTool === 'url-encoder' ? (
+            /* Active Tool 5: URL Encoder / Decoder */
+            <UrlEncoderTool onBackToHub={handleBackToHub} />
           ) : (
-            /* DevTools Hub Grid View */
+            /* DevTools Hub Grid View (All 5 Tools Active) */
             <div className="max-w-5xl mx-auto w-full">
               {/* Hub Header */}
               <div className="text-center max-w-3xl mx-auto mb-10">
@@ -76,7 +88,7 @@ export function DevToolsPage() {
                 </div>
               </div>
 
-              {/* Tools Grid */}
+              {/* Tools Grid — All 5 MVP Tools Active */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Active Tool 1: JSON Formatter & Validator */}
                 <ToolCard
@@ -108,24 +120,24 @@ export function DevToolsPage() {
                   onClick={() => handleSelectTool('uuid-generator')}
                 />
 
-                {/* Coming Soon Tool 4: Base64 Tool */}
+                {/* Active Tool 4: Base64 Tool */}
                 <ToolCard
                   id="base64-tool"
                   title="Base64 Encoder / Decoder"
                   description="Encode plain text and UTF-8 strings into Base64 or decode Base64 back into readable text."
                   category="Encoders"
                   icon={Binary}
-                  isComingSoon={true}
+                  onClick={() => handleSelectTool('base64')}
                 />
 
-                {/* Coming Soon Tool 5: URL Encoder */}
+                {/* Active Tool 5: URL Encoder */}
                 <ToolCard
                   id="url-encoder"
                   title="URL Encoder / Decoder"
                   description="Safely escape special URI characters for query parameters or decode URL-encoded strings."
                   category="Encoders"
                   icon={Link2}
-                  isComingSoon={true}
+                  onClick={() => handleSelectTool('url-encoder')}
                 />
               </div>
             </div>
