@@ -5,6 +5,7 @@ import PublicLayout from '../layouts/PublicLayout';
 import ErrorLayout from '../layouts/ErrorLayout';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ProtectedRoute from '../features/auth/components/ProtectedRoute.jsx';
+import WriterRoute from '../features/auth/components/WriterRoute.jsx';
 import GuestRoute from '../features/auth/components/GuestRoute.jsx';
 
 // Lazy-loaded page components
@@ -22,6 +23,9 @@ const LoginPage = lazy(() => import('../pages/LoginPage'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
+const AdminReviewQueuePage = lazy(() => import('../pages/AdminReviewQueuePage'));
+const WriterDashboardPage = lazy(() => import('../pages/WriterDashboardPage'));
+const WriterArticleEditorPage = lazy(() => import('../pages/WriterArticleEditorPage'));
 const AdminSnippetsPage = lazy(() => import('../pages/AdminSnippetsPage'));
 const AdminSnippetEditorPage = lazy(() => import('../pages/AdminSnippetEditorPage'));
 const AdminErrorsPage = lazy(() => import('../pages/AdminErrorsPage'));
@@ -84,7 +88,7 @@ export function AppRoutes() {
         },
       ],
     },
-    // Guest-only admin sign in route (redirect to /portal-master if already authenticated)
+    // Guest-only sign in route
     {
       path: 'portal-master',
       element: <GuestRoute />,
@@ -100,7 +104,35 @@ export function AppRoutes() {
         },
       ],
     },
-    // Protected admin routes (redirect to /portal-master/login if not authenticated)
+    // Protected Writer portal routes
+    {
+      path: 'writer',
+      element: <WriterRoute />,
+      children: [
+        {
+          element: <MainLayout />,
+          children: [
+            {
+              index: true,
+              element: withSuspense(WriterDashboardPage),
+            },
+            {
+              path: 'articles',
+              element: withSuspense(WriterDashboardPage),
+            },
+            {
+              path: 'articles/new',
+              element: withSuspense(WriterArticleEditorPage),
+            },
+            {
+              path: 'articles/:id/edit',
+              element: withSuspense(WriterArticleEditorPage),
+            },
+          ],
+        },
+      ],
+    },
+    // Protected Admin routes (redirect to /portal-master/login if not authenticated)
     {
       path: 'portal-master',
       element: <ProtectedRoute />,
@@ -120,6 +152,10 @@ export function AppRoutes() {
         {
           path: 'articles/:id/edit',
           element: withSuspense(AdminArticleEditorPage),
+        },
+        {
+          path: 'articles/review',
+          element: withSuspense(AdminReviewQueuePage),
         },
         {
           path: 'snippets',

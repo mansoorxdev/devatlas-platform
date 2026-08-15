@@ -24,7 +24,7 @@ export class AuthService {
     const user = await userRepository.findByEmail(normalizedEmail);
 
     // Defense-in-depth: generic message to prevent email enumeration attacks
-    if (!user || user.role !== 'admin') {
+    if (!user || !['admin', 'writer'].includes(user.role)) {
       throw new AppError('Invalid email or password', 401, 'UNAUTHORIZED');
     }
 
@@ -88,8 +88,8 @@ export class AuthService {
     // 3. Look up user by ID
     const user = await userRepository.findById(storedToken.userId);
 
-    // 4. Defense-in-depth: verify user exists and is admin
-    if (!user || user.role !== 'admin') {
+    // 4. Defense-in-depth: verify user exists and has valid role
+    if (!user || !['admin', 'writer'].includes(user.role)) {
       // Invalidate the compromised/revoked refresh token immediately
       await refreshTokenRepository.deleteToken(refreshTokenString);
       throw new AppError('Invalid or expired authentication token', 401, 'UNAUTHORIZED');

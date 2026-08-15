@@ -30,8 +30,8 @@ export const authenticate = asyncWrapper(async (req, res, next) => {
   // Database retrieval errors bubble up to asyncWrapper / global error handler directly (no masking)
   const user = await userRepository.findById(decoded.id);
 
-  // Defense-in-depth: check user role is admin inside authentication middleware
-  if (!user || user.role !== 'admin') {
+  // Defense-in-depth: check user role is admin or writer
+  if (!user || !['admin', 'writer'].includes(user.role)) {
     throw new AppError('Invalid or expired authentication token', 401, 'UNAUTHORIZED');
   }
 

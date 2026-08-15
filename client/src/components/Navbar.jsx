@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Terminal, LogOut, User } from 'lucide-react';
+import { Menu, X, Sun, Moon, Terminal, LogOut, User, PenTool, CheckSquare } from 'lucide-react';
 import { useTheme } from '../context/ThemeProvider';
 import { useAuthStore } from '@features/auth/store/useAuthStore.js';
 import { APP_PATHS } from '../constants';
@@ -73,14 +73,37 @@ export function Navbar() {
             </button>
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
-                <Link
-                  to={APP_PATHS.ADMIN}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
-                >
-                  <User size={14} className="text-brand-500" />
-                  <span>Admin</span>
-                </Link>
+              <div className="flex items-center gap-2">
+                {['writer', 'admin'].includes(user?.role) && (
+                  <Link
+                    to={APP_PATHS.WRITER}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold hover:bg-brand-500/20 transition-colors"
+                  >
+                    <PenTool size={13} />
+                    <span>Writer Portal</span>
+                  </Link>
+                )}
+
+                {user?.role === 'admin' && (
+                  <>
+                    <Link
+                      to={APP_PATHS.ADMIN_REVIEW_QUEUE}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors"
+                    >
+                      <CheckSquare size={13} />
+                      <span>Review Queue</span>
+                    </Link>
+
+                    <Link
+                      to={APP_PATHS.ADMIN}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <User size={13} className="text-brand-500" />
+                      <span>Admin</span>
+                    </Link>
+                  </>
+                )}
+
                 <button
                   onClick={handleLogout}
                   className="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors cursor-pointer"

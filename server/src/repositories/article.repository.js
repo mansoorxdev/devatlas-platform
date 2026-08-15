@@ -94,6 +94,36 @@ export class ArticleRepository {
   }
 
   /**
+   * Count articles grouped by status for a specific writer/author.
+   * @param {string} authorId - Writer ObjectId string.
+   * @returns {Promise<object>} Counts object { total, draft, pending_review, changes_requested, rejected, published }.
+   */
+  async countByAuthorAndStatus(authorId) {
+    const counts = await Article.aggregate([
+      { $match: { author: new Article.base.Types.ObjectId(authorId) } },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+
+    const result = {
+      total: 0,
+      draft: 0,
+      pending_review: 0,
+      changes_requested: 0,
+      rejected: 0,
+      published: 0,
+    };
+
+    counts.forEach((item) => {
+      if (result[item._id] !== undefined) {
+        result[item._id] = item.count;
+      }
+      result.total += item.count;
+    });
+
+    return result;
+  }
+
+  /**
    * Delete an article by ID.
    * @param {string} id - Article ObjectId string.
    * @returns {Promise<object|null>} Deleted article document or null.

@@ -33,10 +33,25 @@ const articleSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['draft', 'published'],
+      enum: ['draft', 'pending_review', 'changes_requested', 'rejected', 'published'],
       default: 'draft',
       index: true,
     },
+    reviewNote: {
+      type: String,
+      default: null,
+    },
+    reviewHistory: [
+      {
+        action: {
+          type: String,
+          enum: ['request_changes', 'reject', 'submit', 'resubmit', 'approve'],
+        },
+        note: { type: String, default: '' },
+        reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
     author: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

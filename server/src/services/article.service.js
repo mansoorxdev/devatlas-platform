@@ -229,6 +229,287 @@ export class ArticleService {
     await articleRepository.deleteById(id);
     return { message: 'Article deleted successfully' };
   }
+
+  // --- WRITER & EDITORIAL REVIEW METHODS ---
+
+  /**
+   * Create an article as a Writer.
+   * Author ID is assigned strictly from req.user.id server-side.
+   */
+  async createWriterArticle(writerId, payload) {
+    const { title, summary, content, tags = [], action = 'draft' } = payload;
+    const slug = await this.generateUniqueSlug(title);
+    const readTime = this.calculateReadTime(content);
+    const targetStatus = action === 'submit' ? 'pending_review' : 'draft';
+
+    const articleData = {
+      title,
+      slug,
+      summary,
+      content,
+      tags,
+      status: targetStatus,
+      author: writerId,
+      readTime,
+      publishedAt: null,
+    };
+
+    if (action === 'submit') {
+      articleData.reviewHistory = [
+        {
+          action: 'submit',
+          note: 'Submitted for editorial review',
+          reviewedBy: writerId,
+          createdAt: new Date(),
+        },
+      ];
+    }
+
+    return articleRepository.create(articleData);
+  }
+
+  /**
+   * Retrieve articles owned by the authenticated Writer.
+   */
+  async getWriterArticles(writerId, query = {}) {
+    const { page = 1, limit = 10, search = '', tag = '', status = 'all', sort = '-createdAt' } = query;
+
+    const filter = { author: writerId };
+    if (status && status !== 'all') {
+      filter.status = status;
+    }
+    if (tag) {
+      filter.tags = tag.toLowerCase();
+    }
+
+    const sortOption = sort === 'oldest' ? { createdAt: 1 } : { createdAt: -1 };
+
+    return articleRepository.findWithPagination({
+      filter,
+      page,
+      limit,
+      sort: sortOption,
+      search,
+    });
+  }
+
+  /**
+   * Get stats summary for a Writer dashboard.
+   */
+  async getWriterStats(writerId) {
+    return articleRepository.countByAuthorAndStatus(writerId);
+  }
+
+  /**
+   * Get single article owned by Writer, verifying strict ownership.
+   */
+  async getWriterArticleById(writerId, id) {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    const authorId = article.author?.id || article.author?._id?.toString() || article.author?.toString();
+    if (authorId !== writerId.toString()) {
+      throw new AppError('Access denied. You do not own this article.', 403, 'FORBIDDEN');
+    }
+
+    return article;
+  }
+
+  /**
+   * Update an article owned by Writer.
+   * Writers can only edit articles in 'draft' or 'changes_requested' status.
+   */
+  async updateWriterArticle(writerId, id, payload) {
+    const existingArticle = await this.getWriterArticleById(writerId, id);
+
+    if (existingArticle.status === 'pending_review') {
+      throw new AppError('Article is currently under review and cannot be edited.', 400, 'BAD_REQUEST');
+    }
+
+    if (existingArticle.status === 'published') {
+      throw new AppError('Published articles cannot be directly edited by writers.', 400, 'BAD_REQUEST');
+    }
+
+    if (existingArticle.status === 'rejected') {
+      throw new AppError('Rejected articles cannot be edited.', 400, 'BAD_REQUEST');
+    }
+
+    const updateData = {};
+
+    if (payload.title && payload.title !== existingArticle.title) {
+      updateData.title = payload.title;
+      updateData.slug = await this.generateUniqueSlug(payload.title, id);
+    }
+
+    if (payload.summary !== undefined) updateData.summary = payload.summary;
+    if (payload.content !== undefined) {
+      updateData.content = payload.content;
+      updateData.readTime = this.calculateReadTime(payload.content);
+    }
+    if (payload.tags !== undefined) updateData.tags = payload.tags;
+
+    // Handle action: 'draft' or 'submit' / 'resubmit'
+    if (payload.action === 'submit' || payload.action === 'resubmit') {
+      updateData.status = 'pending_review';
+      const historyEntry = {
+        action: existingArticle.status === 'changes_requested' ? 'resubmit' : 'submit',
+        note: existingArticle.status === 'changes_requested' ? 'Resubmitted after requested changes' : 'Submitted for editorial review',
+        reviewedBy: writerId,
+        createdAt: new Date(),
+      };
+      updateData.$push = { reviewHistory: historyEntry };
+    }
+
+    return articleRepository.updateById(id, updateData);
+  }
+
+  /**
+   * Explicitly submit or resubmit a draft / changes_requested article for review.
+   */
+  async submitWriterArticle(writerId, id) {
+    const article = await this.getWriterArticleById(writerId, id);
+
+    if (article.status === 'pending_review') {
+      throw new AppError('Article is already pending review.', 400, 'BAD_REQUEST');
+    }
+
+    if (article.status === 'published') {
+      throw new AppError('Article is already published.', 400, 'BAD_REQUEST');
+    }
+
+    if (article.status === 'rejected') {
+      throw new AppError('Rejected articles cannot be submitted for review.', 400, 'BAD_REQUEST');
+    }
+
+    const isResubmit = article.status === 'changes_requested';
+    const updateData = {
+      status: 'pending_review',
+    };
+
+    const historyEntry = {
+      action: isResubmit ? 'resubmit' : 'submit',
+      note: isResubmit ? 'Resubmitted for review after revisions' : 'Submitted for editorial review',
+      reviewedBy: writerId,
+      createdAt: new Date(),
+    };
+
+    return articleRepository.updateById(id, {
+      ...updateData,
+      $push: { reviewHistory: historyEntry },
+    });
+  }
+
+  /**
+   * Fetch editorial review queue for Admin users.
+   */
+  async getAdminReviewQueue(query = {}) {
+    const { page = 1, limit = 10, search = '', tag = '', status = 'pending_review', sort = '-updatedAt' } = query;
+
+    const filter = {};
+    if (status && status !== 'all') {
+      filter.status = status;
+    } else {
+      filter.status = { $in: ['pending_review', 'changes_requested', 'rejected'] };
+    }
+
+    if (tag) {
+      filter.tags = tag.toLowerCase();
+    }
+
+    const sortOption = sort === 'oldest' ? { updatedAt: 1 } : { updatedAt: -1 };
+
+    return articleRepository.findWithPagination({
+      filter,
+      page,
+      limit,
+      sort: sortOption,
+      search,
+    });
+  }
+
+  /**
+   * Admin approves and publishes a submitted article.
+   */
+  async approveArticle(adminId, id) {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    const updateData = {
+      status: 'published',
+      publishedAt: new Date(),
+      reviewNote: null,
+    };
+
+    const historyEntry = {
+      action: 'approve',
+      note: 'Approved and published by administrator',
+      reviewedBy: adminId,
+      createdAt: new Date(),
+    };
+
+    return articleRepository.updateById(id, {
+      ...updateData,
+      $push: { reviewHistory: historyEntry },
+    });
+  }
+
+  /**
+   * Admin requests changes from author with required feedback note.
+   */
+  async requestChanges(adminId, id, reviewNote) {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    const updateData = {
+      status: 'changes_requested',
+      reviewNote,
+    };
+
+    const historyEntry = {
+      action: 'request_changes',
+      note: reviewNote,
+      reviewedBy: adminId,
+      createdAt: new Date(),
+    };
+
+    return articleRepository.updateById(id, {
+      ...updateData,
+      $push: { reviewHistory: historyEntry },
+    });
+  }
+
+  /**
+   * Admin rejects article with required rejection reason.
+   */
+  async rejectArticle(adminId, id, reviewNote) {
+    const article = await articleRepository.findById(id);
+    if (!article) {
+      throw new AppError(`Article not found with ID: '${id}'`, 404, 'NOT_FOUND');
+    }
+
+    const updateData = {
+      status: 'rejected',
+      reviewNote,
+    };
+
+    const historyEntry = {
+      action: 'reject',
+      note: reviewNote,
+      reviewedBy: adminId,
+      createdAt: new Date(),
+    };
+
+    return articleRepository.updateById(id, {
+      ...updateData,
+      $push: { reviewHistory: historyEntry },
+    });
+  }
 }
 
 export default new ArticleService();

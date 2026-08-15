@@ -20,6 +20,11 @@ export const APP_PATHS = {
   ADMIN_ERRORS: '/portal-master/errors',
   ADMIN_ERROR_NEW: '/portal-master/errors/new',
   ADMIN_ERROR_EDIT: '/portal-master/errors/:id/edit',
+  ADMIN_REVIEW_QUEUE: '/portal-master/articles/review',
+  WRITER: '/writer',
+  WRITER_ARTICLES: '/writer/articles',
+  WRITER_ARTICLE_NEW: '/writer/articles/new',
+  WRITER_ARTICLE_EDIT: '/writer/articles/:id/edit',
 };
 
 export const API_ENDPOINTS = {
