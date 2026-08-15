@@ -86,7 +86,7 @@ const runProfileEditorTests = async () => {
       body: JSON.stringify({
         name: 'Jane Technical Author',
         bio: 'Senior Backend Engineer and Technical Writer specializing in Distributed Systems & Node.js.',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+        avatar: 'avatar-02',
         expertise: ['Node.js', 'System Design', 'React', 'MongoDB'],
         socialLinks: {
           github: 'https://github.com/janedev',
@@ -163,7 +163,7 @@ const runProfileEditorTests = async () => {
     console.assert(authorByline, 'Public article must populate author object');
     console.assert(authorByline.name === 'Jane Technical Author', 'Public author name must match');
     console.assert(authorByline.bio.includes('Senior Backend Engineer'), 'Public author bio must be populated');
-    console.assert(authorByline.avatar === 'https://images.unsplash.com/photo-1534528741775-53994a69daeb', 'Public author avatar must be populated');
+    console.assert(authorByline.avatar === 'avatar-02', 'Public author avatar must be populated');
     console.assert(authorByline.expertise.includes('Node.js'), 'Public author expertise must be populated');
     console.assert(authorByline.socialLinks.github === 'https://github.com/janedev', 'Public author social links must be populated');
     console.assert(authorByline.email === undefined, 'CRITICAL SECURITY PASS: Public author object MUST NOT expose email address');

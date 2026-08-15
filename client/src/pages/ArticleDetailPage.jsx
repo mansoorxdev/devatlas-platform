@@ -12,9 +12,10 @@ import {
   AlertCircle,
   BookOpen,
 } from 'lucide-react';
-import { articleService } from '@features/articles/services/articleService.js';
+import { articleService } from '@features/articles';
 import Container from '@components/Container';
 import MarkdownRenderer from '@components/MarkdownRenderer';
+import { resolveAvatarUrl } from '../constants/avatars';
 
 export function ArticleDetailPage() {
   const { slug } = useParams();
@@ -224,21 +225,15 @@ export function ArticleDetailPage() {
                 {article.author && (
                   <div className="mt-12 p-6 bg-slate-50 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl">
                     <div className="flex flex-col sm:flex-row items-start gap-4">
-                      {article.author.avatar ? (
-                        <img
-                          src={article.author.avatar}
-                          alt={article.author.name}
-                          className="w-14 h-14 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb';
-                          }}
-                        />
-                      ) : (
-                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold text-lg flex items-center justify-center shrink-0 shadow-md">
-                          {article.author.name ? article.author.name[0].toUpperCase() : 'A'}
-                        </div>
-                      )}
+                      <img
+                        src={resolveAvatarUrl(article.author.avatar)}
+                        alt={article.author.name}
+                        className="w-14 h-14 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = '/avatars/avatar-01.svg';
+                        }}
+                      />
 
                       <div className="flex-1 space-y-2">
                         <div className="flex items-center justify-between gap-2">

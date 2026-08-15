@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg6" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#06B6D4"/>
+      <stop offset="1" stop-color="#0E7490"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="60" fill="url(#bg6)"/>
+  <circle cx="60" cy="46" r="22" fill="#F3F4F6"/>
+  <path d="M60 74C40 74 24 88 24 104V120H96V104C96 88 80 74 60 74Z" fill="#F3F4F6"/>
+  <circle cx="60" cy="46" r="18" fill="#164E63"/>
+  <path d="M60 78C44 78 30 90 30 104V120H90V104C90 90 76 78 60 78Z" fill="#164E63"/>
+  <!-- Sparkles / Neural Dots -->
+  <circle cx="52" cy="44" r="2" fill="#A5F3FC"/>
+  <circle cx="68" cy="44" r="2" fill="#A5F3FC"/>
+  <circle cx="60" cy="50" r="2" fill="#A5F3FC"/>
+  <line x1="52" y1="44" x2="60" y2="50" stroke="#A5F3FC" stroke-width="1.5"/>
+  <line x1="68" y1="44" x2="60" y2="50" stroke="#A5F3FC" stroke-width="1.5"/>
+</svg>

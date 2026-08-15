@@ -59,7 +59,12 @@ const userSchema = new mongoose.Schema(
     avatar: {
       type: String,
       trim: true,
-      default: '',
+      default: 'avatar-01',
+    },
+    avatarType: {
+      type: String,
+      enum: ['default', 'uploaded'],
+      default: 'default',
     },
     expertise: {
       type: [String],

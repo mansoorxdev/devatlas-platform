@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
 import userService from '../services/userService';
 import { APP_PATHS } from '../constants';
+import { resolveAvatarUrl } from '../constants/avatars';
 import {
   Users,
   Search,
@@ -205,17 +206,15 @@ export function AdminWritersPage() {
                         <tr key={writer.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
                           <td className="py-4 px-6">
                             <div className="flex items-center gap-3">
-                              {writer.avatar ? (
-                                <img
-                                  src={writer.avatar}
-                                  alt={writer.name}
-                                  className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800"
-                                />
-                              ) : (
-                                <div className="w-9 h-9 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 font-extrabold text-xs flex items-center justify-center">
-                                  {writer.name[0].toUpperCase()}
-                                </div>
-                              )}
+                              <img
+                                src={resolveAvatarUrl(writer.avatar)}
+                                alt={writer.name}
+                                className="w-9 h-9 rounded-full object-cover border border-slate-200 dark:border-slate-800"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = '/avatars/avatar-01.svg';
+                                }}
+                              />
                               <div>
                                 <Link
                                   to={`/portal-master/writers/${writer.id}`}

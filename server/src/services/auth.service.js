@@ -4,6 +4,7 @@ import AppError from '#utils/app-error.js';
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from '#utils/jwt.js';
 import { parseDurationToMs } from '#utils/duration.js';
 import config from '#config/env.config.js';
+import { DEFAULT_AVATAR_ID } from '../constants/avatars.js';
 
 export class AuthService {
   /**
@@ -27,13 +28,15 @@ export class AuthService {
       throw new AppError('An account with this email address already exists.', 409, 'DUPLICATE_EMAIL');
     }
 
-    // Force role: 'writer' and isActive: true server-side
+    // Force role: 'writer', isActive: true, and assign default avatar server-side
     const user = await userRepository.create({
       name: name.trim(),
       email: normalizedEmail,
       password,
       role: 'writer',
       isActive: true,
+      avatar: DEFAULT_AVATAR_ID,
+      avatarType: 'default',
     });
 
     // Access payload

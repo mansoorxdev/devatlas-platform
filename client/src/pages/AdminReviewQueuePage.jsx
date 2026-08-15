@@ -6,6 +6,7 @@ import editorialService from '../services/editorialService';
 import userService from '../services/userService';
 import AdminReviewModal from '../components/AdminReviewModal';
 import { APP_PATHS } from '../constants';
+import { resolveAvatarUrl } from '../constants/avatars';
 import {
   CheckSquare,
   Search,
@@ -285,11 +286,15 @@ export function AdminReviewQueuePage() {
 
                           <td className="py-4 px-6 whitespace-nowrap">
                             <div className="flex items-center gap-2">
-                              {article.author?.avatar ? (
-                                <img src={article.author.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
-                              ) : (
-                                <User size={14} className="text-slate-400" />
-                              )}
+                              <img
+                                src={resolveAvatarUrl(article.author?.avatar)}
+                                alt=""
+                                className="w-6 h-6 rounded-full object-cover"
+                                onError={(e) => {
+                                  e.target.onerror = null;
+                                  e.target.src = '/avatars/avatar-01.svg';
+                                }}
+                              />
                               <span className="font-semibold text-slate-800 dark:text-slate-200">{article.author?.name || 'Writer'}</span>
                             </div>
                           </td>

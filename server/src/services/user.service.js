@@ -3,6 +3,7 @@ import articleRepository from '#repositories/article.repository.js';
 import Article from '#models/article.model.js';
 import ArticleAssignment from '#models/assignment.model.js';
 import AppError from '#utils/app-error.js';
+import { ALLOWED_AVATAR_IDS, DEFAULT_AVATAR_ID } from '../constants/avatars.js';
 
 export class UserService {
   /**
@@ -160,7 +161,18 @@ export class UserService {
 
     if (profileData.name) user.name = profileData.name.trim();
     if (profileData.bio !== undefined) user.bio = profileData.bio.trim();
-    if (profileData.avatar !== undefined) user.avatar = profileData.avatar.trim();
+    if (profileData.avatar !== undefined) {
+      const trimmedAvatar = profileData.avatar.trim();
+      if (!ALLOWED_AVATAR_IDS.includes(trimmedAvatar)) {
+        throw new AppError(
+          'Invalid avatar selection. Please choose an approved DevAtlas profile avatar ID.',
+          400,
+          'INVALID_AVATAR'
+        );
+      }
+      user.avatar = trimmedAvatar;
+      user.avatarType = 'default';
+    }
     if (profileData.expertise) user.expertise = profileData.expertise;
     if (profileData.socialLinks) {
       user.socialLinks = {

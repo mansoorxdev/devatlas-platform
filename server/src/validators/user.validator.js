@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { ALLOWED_AVATAR_IDS } from '../constants/avatars.js';
 
 export const writerQuerySchema = z.object({
   query: z
@@ -48,6 +49,9 @@ export const updateProfileSchema = z.object({
       avatar: z
         .string()
         .trim()
+        .refine((val) => ALLOWED_AVATAR_IDS.includes(val), {
+          message: 'Invalid avatar selection. Please choose an approved DevAtlas profile avatar ID.',
+        })
         .optional(),
       expertise: z
         .array(z.string().trim())

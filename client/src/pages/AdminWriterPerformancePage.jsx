@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
 import userService from '../services/userService';
 import { APP_PATHS } from '../constants';
+import { resolveAvatarUrl } from '../constants/avatars';
 import {
   ArrowLeft,
   User,
@@ -125,17 +126,15 @@ export function AdminWriterPerformancePage() {
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm mb-8 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
               <div className="flex items-start sm:items-center gap-4">
-                {writer.avatar ? (
-                  <img
-                    src={writer.avatar}
-                    alt={writer.name}
-                    className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-brand-500/20"
-                  />
-                ) : (
-                  <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-400 text-2xl font-black flex items-center justify-center border-2 border-brand-500/20">
-                    {writer.name[0].toUpperCase()}
-                  </div>
-                )}
+                <img
+                  src={resolveAvatarUrl(writer.avatar)}
+                  alt={writer.name}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-brand-500/20"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = '/avatars/avatar-01.svg';
+                  }}
+                />
 
                 <div>
                   <div className="flex items-center gap-2 flex-wrap mb-1">

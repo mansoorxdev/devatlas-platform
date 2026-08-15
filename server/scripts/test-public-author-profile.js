@@ -42,7 +42,7 @@ const runAuthorProfileTests = async () => {
       role: 'writer',
       isActive: true,
       bio: 'Senior Cloud Architect & Open Source Contributor.',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb',
+      avatar: 'avatar-03',
       expertise: ['Cloud', 'Kubernetes', 'Go'],
       socialLinks: { github: 'https://github.com/alexcontrib' },
     });

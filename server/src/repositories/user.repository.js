@@ -112,11 +112,12 @@ export class UserRepository {
    */
   async findAuthorBySlug(slug) {
     await this.backfillMissingSlugs();
+    await this.backfillMissingAvatars();
 
     const user = await User.findOne({
       slug: slug.toLowerCase(),
       isActive: { $ne: false },
-    }).select('name slug bio avatar expertise socialLinks role');
+    }).select('name slug bio avatar avatarType expertise socialLinks role');
 
     return user;
   }
@@ -127,6 +128,20 @@ export class UserRepository {
   async backfillMissingSlugs() {
     const usersWithoutSlug = await User.find({ $or: [{ slug: { $exists: false } }, { slug: null }, { slug: '' }] });
     for (const user of usersWithoutSlug) {
+      await user.save();
+    }
+  }
+
+  /**
+   * Backfill missing avatars for existing users in database
+   */
+  async backfillMissingAvatars() {
+    const usersWithoutAvatar = await User.find({
+      $or: [{ avatar: { $exists: false } }, { avatar: null }, { avatar: '' }],
+    });
+    for (const user of usersWithoutAvatar) {
+      user.avatar = 'avatar-01';
+      user.avatarType = 'default';
       await user.save();
     }
   }

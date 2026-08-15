@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <defs>
+    <linearGradient id="bg4" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="60" fill="url(#bg4)"/>
+  <circle cx="60" cy="46" r="22" fill="#F3F4F6"/>
+  <path d="M60 74C40 74 24 88 24 104V120H96V104C96 88 80 74 60 74Z" fill="#F3F4F6"/>
+  <circle cx="60" cy="46" r="18" fill="#451A03"/>
+  <path d="M60 78C44 78 30 90 30 104V120H90V104C90 90 76 78 60 78Z" fill="#451A03"/>
+  <!-- Database Stack Icon -->
+  <ellipse cx="60" cy="40" rx="10" ry="4" stroke="#FDE68A" stroke-width="2" fill="none"/>
+  <path d="M50 40 V45 C50 47 70 47 70 45 V40" stroke="#FDE68A" stroke-width="2" fill="none"/>
+  <path d="M50 45 V50 C50 52 70 52 70 50 V45" stroke="#FDE68A" stroke-width="2" fill="none"/>
+</svg>

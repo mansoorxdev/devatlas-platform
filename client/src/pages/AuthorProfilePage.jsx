@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
 import ArticleCard from '../features/articles/components/ArticleCard.jsx';
 import userService from '../services/userService';
+import { resolveAvatarUrl } from '../constants/avatars';
 import {
   User,
   BookOpen,
@@ -143,21 +144,15 @@ export function AuthorProfilePage() {
 
                   <div className="flex flex-col sm:flex-row items-start gap-6 relative z-10">
                     {/* Avatar */}
-                    {author.avatar ? (
-                      <img
-                        src={author.avatar}
-                        alt={author.name}
-                        className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-brand-500/20 shadow-md shrink-0"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb';
-                        }}
-                      />
-                    ) : (
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold text-2xl flex items-center justify-center shrink-0 shadow-lg shadow-brand-500/20">
-                        {author.name.charAt(0).toUpperCase()}
-                      </div>
-                    )}
+                    <img
+                      src={resolveAvatarUrl(author.avatar)}
+                      alt={author.name}
+                      className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-brand-500/20 shadow-md shrink-0"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '/avatars/avatar-01.svg';
+                      }}
+                    />
 
                     {/* Author Meta Details */}
                     <div className="flex-1 space-y-3">
