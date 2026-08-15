@@ -3,6 +3,7 @@ import authRoutes from './auth.routes.js';
 import articleRoutes from './article.routes.js';
 import snippetRoutes from './snippet.routes.js';
 import errorRoutes from './error.routes.js';
+import searchRoutes from './search.routes.js';
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use('/auth', authRoutes);
 router.use('/articles', articleRoutes);
 router.use('/snippets', snippetRoutes);
 router.use('/errors', errorRoutes);
+router.use('/search', searchRoutes);
 
 export default router;
