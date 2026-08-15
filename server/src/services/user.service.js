@@ -62,6 +62,41 @@ export class UserService {
     const updatedUser = await userRepository.updateUserStatus(id, isActive);
     return updatedUser;
   }
+
+  /**
+   * Fetch authenticated user's own profile.
+   */
+  async getProfile(userId) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404, 'NOT_FOUND');
+    }
+    return user;
+  }
+
+  /**
+   * Update authenticated user's own profile details.
+   */
+  async updateProfile(userId, profileData) {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404, 'NOT_FOUND');
+    }
+
+    if (profileData.name) user.name = profileData.name.trim();
+    if (profileData.bio !== undefined) user.bio = profileData.bio.trim();
+    if (profileData.avatar !== undefined) user.avatar = profileData.avatar.trim();
+    if (profileData.expertise) user.expertise = profileData.expertise;
+    if (profileData.socialLinks) {
+      user.socialLinks = {
+        ...user.socialLinks,
+        ...profileData.socialLinks,
+      };
+    }
+
+    await user.save();
+    return user;
+  }
 }
 
 export default new UserService();

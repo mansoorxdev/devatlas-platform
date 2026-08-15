@@ -29,3 +29,36 @@ export const toggleUserStatusSchema = z.object({
     })
     .strict(),
 });
+
+export const updateProfileSchema = z.object({
+  body: z
+    .object({
+      name: z
+        .string()
+        .min(2, 'Name must be at least 2 characters')
+        .max(100, 'Name must not exceed 100 characters')
+        .trim()
+        .optional(),
+      bio: z
+        .string()
+        .max(500, 'Bio must not exceed 500 characters')
+        .trim()
+        .optional(),
+      avatar: z
+        .string()
+        .trim()
+        .optional(),
+      expertise: z
+        .array(z.string().trim())
+        .max(10, 'Cannot specify more than 10 areas of expertise')
+        .optional(),
+      socialLinks: z
+        .object({
+          github: z.string().trim().optional(),
+          twitter: z.string().trim().optional(),
+          website: z.string().trim().optional(),
+        })
+        .optional(),
+    })
+    .strict(),
+});

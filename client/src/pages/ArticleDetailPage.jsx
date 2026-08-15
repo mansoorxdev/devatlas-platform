@@ -211,6 +211,59 @@ export function ArticleDetailPage() {
                   <MarkdownRenderer content={article.content} />
                 </div>
 
+                {/* Author Byline Profile Card */}
+                {article.author && (
+                  <div className="mt-12 p-6 bg-slate-50 dark:bg-slate-950/80 border border-slate-200/80 dark:border-slate-800/80 rounded-3xl">
+                    <div className="flex flex-col sm:flex-row items-start gap-4">
+                      {article.author.avatar ? (
+                        <img
+                          src={article.author.avatar}
+                          alt={article.author.name}
+                          className="w-14 h-14 rounded-full object-cover border border-slate-200 dark:border-slate-800 shrink-0"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb';
+                          }}
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-brand-600 to-indigo-600 text-white font-extrabold text-lg flex items-center justify-center shrink-0 shadow-md">
+                          {article.author.name ? article.author.name[0].toUpperCase() : 'A'}
+                        </div>
+                      )}
+
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <div>
+                            <h3 className="text-base font-extrabold text-slate-900 dark:text-slate-100">
+                              Written by {article.author.name || 'DevAtlas Contributor'}
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Technical Writer & Developer</p>
+                          </div>
+                        </div>
+
+                        {article.author.bio && (
+                          <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed font-normal">
+                            {article.author.bio}
+                          </p>
+                        )}
+
+                        {article.author.expertise?.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {article.author.expertise.map((exp) => (
+                              <span
+                                key={exp}
+                                className="px-2.5 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-800 text-[11px] font-semibold text-slate-700 dark:text-slate-300"
+                              >
+                                {exp}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Bottom Article Footer */}
                 <footer className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
                   <Link

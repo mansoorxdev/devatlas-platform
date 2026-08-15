@@ -75,13 +75,22 @@ export function Navbar() {
             {isAuthenticated ? (
               <div className="flex items-center gap-2">
                 {['writer', 'admin'].includes(user?.role) && (
-                  <Link
-                    to={APP_PATHS.WRITER}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold hover:bg-brand-500/20 transition-colors"
-                  >
-                    <PenTool size={13} />
-                    <span>Writer Portal</span>
-                  </Link>
+                  <>
+                    <Link
+                      to={APP_PATHS.WRITER}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold hover:bg-brand-500/20 transition-colors"
+                    >
+                      <PenTool size={13} />
+                      <span>Writer Portal</span>
+                    </Link>
+                    <Link
+                      to={APP_PATHS.WRITER_PROFILE}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <User size={13} className="text-brand-500" />
+                      <span>Profile</span>
+                    </Link>
+                  </>
                 )}
 
                 {user?.role === 'admin' && (

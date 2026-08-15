@@ -4,7 +4,7 @@ import validate from '#middlewares/validation.middleware.js';
 import authenticate from '#middlewares/auth.middleware.js';
 import authorizeAdmin from '#middlewares/admin.middleware.js';
 import asyncWrapper from '#utils/async-wrapper.js';
-import { writerQuerySchema, toggleUserStatusSchema } from '#validators/user.validator.js';
+import { writerQuerySchema, toggleUserStatusSchema, updateProfileSchema } from '#validators/user.validator.js';
 
 const router = express.Router();
 
@@ -32,6 +32,21 @@ router.patch(
   authorizeAdmin,
   validate(toggleUserStatusSchema),
   asyncWrapper(userController.toggleWriterStatus.bind(userController))
+);
+
+// Get current user's profile
+router.get(
+  '/profile',
+  authenticate,
+  asyncWrapper(userController.getProfile.bind(userController))
+);
+
+// Update current user's profile
+router.patch(
+  '/profile',
+  authenticate,
+  validate(updateProfileSchema),
+  asyncWrapper(userController.updateProfile.bind(userController))
 );
 
 export default router;

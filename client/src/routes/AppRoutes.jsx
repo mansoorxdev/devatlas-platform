@@ -29,6 +29,7 @@ const AdminReviewQueuePage = lazy(() => import('../pages/AdminReviewQueuePage'))
 const AdminWritersPage = lazy(() => import('../pages/AdminWritersPage'));
 const WriterDashboardPage = lazy(() => import('../pages/WriterDashboardPage'));
 const WriterArticleEditorPage = lazy(() => import('../pages/WriterArticleEditorPage'));
+const WriterProfilePage = lazy(() => import('../pages/WriterProfilePage'));
 const AdminSnippetsPage = lazy(() => import('../pages/AdminSnippetsPage'));
 const AdminSnippetEditorPage = lazy(() => import('../pages/AdminSnippetEditorPage'));
 const AdminErrorsPage = lazy(() => import('../pages/AdminErrorsPage'));
@@ -138,6 +139,10 @@ export function AppRoutes() {
             {
               index: true,
               element: withSuspense(WriterDashboardPage),
+            },
+            {
+              path: 'profile',
+              element: withSuspense(WriterProfilePage),
             },
             {
               path: 'articles',

@@ -8,7 +8,7 @@ export class ArticleRepository {
    */
   async create(articleData) {
     const article = await Article.create(articleData);
-    return await article.populate('author', 'name email role');
+    return await article.populate('author', 'name bio avatar expertise socialLinks role');
   }
 
   /**
@@ -17,7 +17,7 @@ export class ArticleRepository {
    * @returns {Promise<object|null>} Found article or null.
    */
   async findById(id) {
-    return await Article.findById(id).populate('author', 'name email role');
+    return await Article.findById(id).populate('author', 'name bio avatar expertise socialLinks role');
   }
 
   /**
@@ -26,7 +26,7 @@ export class ArticleRepository {
    * @returns {Promise<object|null>} Found article or null.
    */
   async findBySlug(slug) {
-    return await Article.findOne({ slug }).populate('author', 'name email role');
+    return await Article.findOne({ slug }).populate('author', 'name bio avatar expertise socialLinks role');
   }
 
   /**
@@ -60,7 +60,7 @@ export class ArticleRepository {
 
     const [items, total] = await Promise.all([
       Article.find(queryFilter)
-        .populate('author', 'name email role')
+        .populate('author', 'name bio avatar expertise socialLinks role')
         .sort(sort)
         .skip(skip)
         .limit(limit),
@@ -90,7 +90,7 @@ export class ArticleRepository {
     return await Article.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
-    }).populate('author', 'name email role');
+    }).populate('author', 'name bio avatar expertise socialLinks role');
   }
 
   /**

@@ -40,6 +40,34 @@ export class UserController {
       },
     });
   }
+
+  /**
+   * Protected endpoint: Get authenticated user's own profile.
+   */
+  async getProfile(req, res) {
+    const user = await userService.getProfile(req.user.id);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user,
+      },
+    });
+  }
+
+  /**
+   * Protected endpoint: Update authenticated user's own profile.
+   */
+  async updateProfile(req, res) {
+    const user = await userService.updateProfile(req.user.id, req.body);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        user,
+      },
+    });
+  }
 }
 
 export default new UserController();

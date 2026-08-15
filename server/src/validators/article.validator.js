@@ -24,6 +24,9 @@ export const createArticleSchema = z.object({
         .array(z.string().trim().toLowerCase())
         .optional()
         .default([]),
+      featuredImage: z.string().trim().optional().default(''),
+      seoTitle: z.string().trim().max(200).optional().default(''),
+      seoDescription: z.string().trim().max(300).optional().default(''),
       status: z
         .enum(['draft', 'published'], {
           errorMap: () => ({ message: "Status must be either 'draft' or 'published'" }),
@@ -63,6 +66,9 @@ export const updateArticleSchema = z.object({
       tags: z
         .array(z.string().trim().toLowerCase())
         .optional(),
+      featuredImage: z.string().trim().optional(),
+      seoTitle: z.string().trim().max(200).optional(),
+      seoDescription: z.string().trim().max(300).optional(),
       status: z
         .enum(['draft', 'published'], {
           errorMap: () => ({ message: "Status must be either 'draft' or 'published'" }),
@@ -128,6 +134,9 @@ export const writerCreateArticleSchema = z.object({
         .array(z.string().trim().toLowerCase())
         .optional()
         .default([]),
+      featuredImage: z.string().trim().optional().default(''),
+      seoTitle: z.string().trim().max(200).optional().default(''),
+      seoDescription: z.string().trim().max(300).optional().default(''),
       action: z
         .enum(['draft', 'submit'], {
           errorMap: () => ({ message: "Action must be 'draft' or 'submit'" }),
@@ -167,6 +176,9 @@ export const writerUpdateArticleSchema = z.object({
       tags: z
         .array(z.string().trim().toLowerCase())
         .optional(),
+      featuredImage: z.string().trim().optional(),
+      seoTitle: z.string().trim().max(200).optional(),
+      seoDescription: z.string().trim().max(300).optional(),
       action: z
         .enum(['draft', 'submit', 'resubmit'], {
           errorMap: () => ({ message: "Action must be 'draft', 'submit', or 'resubmit'" }),
@@ -194,4 +206,3 @@ export const reviewActionSchema = z.object({
     })
     .strict(),
 });
-

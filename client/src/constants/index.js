@@ -23,6 +23,7 @@ export const APP_PATHS = {
   ADMIN_REVIEW_QUEUE: '/portal-master/articles/review',
   ADMIN_WRITERS: '/portal-master/writers',
   WRITER: '/writer',
+  WRITER_PROFILE: '/writer/profile',
   WRITER_LOGIN: '/writer/login',
   WRITER_REGISTER: '/writer/register',
   WRITER_ARTICLES: '/writer/articles',

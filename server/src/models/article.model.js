@@ -31,6 +31,23 @@ const articleSchema = new mongoose.Schema(
       default: [],
       index: true,
     },
+    featuredImage: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    seoTitle: {
+      type: String,
+      trim: true,
+      maxlength: [200, 'SEO title cannot exceed 200 characters'],
+      default: '',
+    },
+    seoDescription: {
+      type: String,
+      trim: true,
+      maxlength: [300, 'SEO description cannot exceed 300 characters'],
+      default: '',
+    },
     status: {
       type: String,
       enum: ['draft', 'pending_review', 'changes_requested', 'rejected', 'published'],
