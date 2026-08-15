@@ -21,6 +21,7 @@ export const APP_PATHS = {
   ADMIN_ERROR_NEW: '/portal-master/errors/new',
   ADMIN_ERROR_EDIT: '/portal-master/errors/:id/edit',
   ADMIN_REVIEW_QUEUE: '/portal-master/articles/review',
+  ADMIN_WRITERS: '/portal-master/writers',
   WRITER: '/writer',
   WRITER_ARTICLES: '/writer/articles',
   WRITER_ARTICLE_NEW: '/writer/articles/new',

@@ -1,5 +1,6 @@
 import express from 'express';
 import authRoutes from './auth.routes.js';
+import userRoutes from './user.routes.js';
 import articleRoutes from './article.routes.js';
 import snippetRoutes from './snippet.routes.js';
 import errorRoutes from './error.routes.js';
@@ -19,6 +20,7 @@ router.get('/health', (req, res) => {
 
 // Mounting Sub-Routers
 router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
 router.use('/articles', articleRoutes);
 router.use('/snippets', snippetRoutes);
 router.use('/errors', errorRoutes);

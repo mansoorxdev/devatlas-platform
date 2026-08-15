@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
 import editorialService from '../services/editorialService';
@@ -17,6 +17,7 @@ import {
   ChevronRight,
   ArrowLeft,
   MessageSquare,
+  History,
 } from 'lucide-react';
 
 const STATUS_BADGES = {
@@ -39,22 +40,39 @@ const STATUS_BADGES = {
 };
 
 export function AdminReviewQueuePage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL-synchronized filters
+  const activeStatus = searchParams.get('status') || 'pending_review';
+  const currentPage = parseInt(searchParams.get('page') || '1', 10);
+  const searchQuery = searchParams.get('search') || '';
+
   const [queueItems, setQueueItems] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
-  const [activeStatus, setActiveStatus] = useState('pending_review');
-  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Review modal target article
   const [selectedArticle, setSelectedArticle] = useState(null);
 
+  const updateFilters = (newParams) => {
+    const nextParams = new URLSearchParams(searchParams);
+    Object.entries(newParams).forEach(([key, value]) => {
+      if (value === null || value === '' || (key === 'status' && value === 'pending_review') || (key === 'page' && value === 1)) {
+        nextParams.delete(key);
+      } else {
+        nextParams.set(key, value);
+      }
+    });
+    setSearchParams(nextParams);
+  };
+
   const fetchReviewQueue = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const res = await editorialService.getReviewQueue({
-        page: pagination.page,
+        page: currentPage,
         status: activeStatus,
         search: searchQuery,
       });
@@ -68,7 +86,7 @@ export function AdminReviewQueuePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [pagination.page, activeStatus, searchQuery]);
+  }, [currentPage, activeStatus, searchQuery]);
 
   useEffect(() => {
     fetchReviewQueue();
@@ -119,10 +137,7 @@ export function AdminReviewQueuePage() {
               ].map((tab) => (
                 <button
                   key={tab.id}
-                  onClick={() => {
-                    setActiveStatus(tab.id);
-                    setPagination((prev) => ({ ...prev, page: 1 }));
-                  }}
+                  onClick={() => updateFilters({ status: tab.id, page: 1 })}
                   className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
                     activeStatus === tab.id
                       ? 'bg-brand-600 text-white font-semibold shadow-sm'
@@ -135,13 +150,13 @@ export function AdminReviewQueuePage() {
             </div>
 
             {/* Search Input */}
-            <div className="relative w-full md:w-64">
+            <div className="relative w-full md:w-72">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search queue..."
+                placeholder="Search title or writer name..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => updateFilters({ search: e.target.value, page: 1 })}
                 className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
               />
             </div>
@@ -167,11 +182,11 @@ export function AdminReviewQueuePage() {
           ) : queueItems.length === 0 ? (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
               <CheckSquare size={40} className="mx-auto text-emerald-400 mb-3" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Review Queue Empty</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Review Queue Clear</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
                 {activeStatus === 'pending_review'
                   ? 'All contributor submissions have been reviewed!'
-                  : 'No articles match the selected review status.'}
+                  : 'No articles match the selected review criteria.'}
               </p>
             </div>
           ) : (
@@ -181,8 +196,9 @@ export function AdminReviewQueuePage() {
                   <thead className="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
                     <tr>
                       <th className="py-3.5 px-4">Submitted Article</th>
-                      <th className="py-3.5 px-4">Author</th>
+                      <th className="py-3.5 px-4">Writer</th>
                       <th className="py-3.5 px-4">Status</th>
+                      <th className="py-3.5 px-4">History</th>
                       <th className="py-3.5 px-4">Updated</th>
                       <th className="py-3.5 px-4 text-right">Action</th>
                     </tr>
@@ -198,6 +214,7 @@ export function AdminReviewQueuePage() {
 
                       const authorName = article.author?.name || 'Unknown Author';
                       const authorEmail = article.author?.email || '';
+                      const historyCount = article.reviewHistory?.length || 0;
 
                       return (
                         <tr key={article.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
@@ -212,6 +229,12 @@ export function AdminReviewQueuePage() {
                           <td className="py-3.5 px-4 whitespace-nowrap">
                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
                               {badge.label}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
+                            <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                              <History size={11} />
+                              <span>{historyCount} entries</span>
                             </span>
                           </td>
                           <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
@@ -242,15 +265,15 @@ export function AdminReviewQueuePage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => setPagination((prev) => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
-                      disabled={pagination.page <= 1}
+                      onClick={() => updateFilters({ page: Math.max(1, currentPage - 1) })}
+                      disabled={currentPage <= 1}
                       className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
                     >
                       <ChevronLeft size={14} />
                     </button>
                     <button
-                      onClick={() => setPagination((prev) => ({ ...prev, page: Math.min(pagination.pages, prev.page + 1) }))}
-                      disabled={pagination.page >= pagination.pages}
+                      onClick={() => updateFilters({ page: Math.min(pagination.pages, currentPage + 1) })}
+                      disabled={currentPage >= pagination.pages}
                       className="px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 disabled:opacity-40 cursor-pointer"
                     >
                       <ChevronRight size={14} />

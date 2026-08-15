@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
@@ -15,6 +15,8 @@ import {
   Eye,
   Edit3,
   Tag,
+  X,
+  Lock,
 } from 'lucide-react';
 
 export function WriterArticleEditorPage() {
@@ -29,6 +31,13 @@ export function WriterArticleEditorPage() {
     tagsString: '',
   });
 
+  const [initialData, setInitialData] = useState({
+    title: '',
+    summary: '',
+    content: '',
+    tagsString: '',
+  });
+
   const [articleStatus, setArticleStatus] = useState('draft');
   const [reviewNote, setReviewNote] = useState(null);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
@@ -36,6 +45,29 @@ export function WriterArticleEditorPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+
+  // Confirmation Modal state
+  const [showSubmitConfirmModal, setShowSubmitConfirmModal] = useState(false);
+
+  // Check for unsaved changes
+  const isDirty =
+    formData.title !== initialData.title ||
+    formData.summary !== initialData.summary ||
+    formData.content !== initialData.content ||
+    formData.tagsString !== initialData.tagsString;
+
+  // Unsaved changes browser prompt on tab close / refresh
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isDirty && !isSaving && !isSubmitting) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isDirty, isSaving, isSubmitting]);
 
   useEffect(() => {
     if (isEditing) {
@@ -45,12 +77,14 @@ export function WriterArticleEditorPage() {
           const res = await writerService.getMyArticleById(id);
           if (res.success && res.data.article) {
             const article = res.data.article;
-            setFormData({
+            const loaded = {
               title: article.title || '',
               summary: article.summary || '',
               content: article.content || '',
               tagsString: (article.tags || []).join(', '),
-            });
+            };
+            setFormData(loaded);
+            setInitialData(loaded);
             setArticleStatus(article.status || 'draft');
             setReviewNote(article.reviewNote || null);
           }
@@ -64,8 +98,7 @@ export function WriterArticleEditorPage() {
     }
   }, [id, isEditing]);
 
-  const handleSubmitForm = async (e, action = 'draft') => {
-    if (e) e.preventDefault();
+  const executeSaveOrSubmit = async (action = 'draft') => {
     setError(null);
 
     const tags = formData.tagsString
@@ -81,7 +114,7 @@ export function WriterArticleEditorPage() {
       action,
     };
 
-    if (action === 'submit') setIsSubmitting(true);
+    if (action === 'submit' || action === 'resubmit') setIsSubmitting(true);
     else setIsSaving(true);
 
     try {
@@ -90,12 +123,24 @@ export function WriterArticleEditorPage() {
       } else {
         await writerService.createArticle(payload);
       }
+      // Reset dirty state
+      setInitialData(formData);
       navigate(APP_PATHS.WRITER);
     } catch (err) {
       setError(err.response?.data?.error?.message || 'Failed to save article.');
     } finally {
       setIsSaving(false);
       setIsSubmitting(false);
+      setShowSubmitConfirmModal(false);
+    }
+  };
+
+  const handleFormSubmit = (e, action = 'draft') => {
+    if (e) e.preventDefault();
+    if (action === 'submit' || action === 'resubmit') {
+      setShowSubmitConfirmModal(true);
+    } else {
+      executeSaveOrSubmit('draft');
     }
   };
 
@@ -106,7 +151,7 @@ export function WriterArticleEditorPage() {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 text-center">
         <Container className="max-w-4xl">
           <RefreshCw size={28} className="mx-auto text-brand-500 animate-spin mb-3" />
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Loading editor...</p>
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Loading article editor...</p>
         </Container>
       </div>
     );
@@ -124,6 +169,11 @@ export function WriterArticleEditorPage() {
           <div className="flex items-center justify-between gap-4 mb-6">
             <Link
               to={APP_PATHS.WRITER}
+              onClick={(e) => {
+                if (isDirty && !window.confirm('You have unsaved changes. Leave without saving?')) {
+                  e.preventDefault();
+                }
+              }}
               className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 transition-colors"
             >
               <ArrowLeft size={16} />
@@ -142,7 +192,7 @@ export function WriterArticleEditorPage() {
             </div>
           </div>
 
-          {/* Editorial Feedback Alert Banner */}
+          {/* Workflow Banners */}
           {articleStatus === 'changes_requested' && reviewNote && (
             <div className="bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/80 rounded-2xl p-5 mb-6 shadow-sm">
               <div className="flex items-start gap-3">
@@ -153,17 +203,33 @@ export function WriterArticleEditorPage() {
                   </h3>
                   <p className="text-xs text-slate-700 dark:text-slate-200 mt-1 leading-relaxed">{reviewNote}</p>
                   <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-2 italic">
-                    Please revise your draft based on the feedback above and click "Resubmit for Review".
+                    Please revise your content and click "Resubmit for Review".
                   </p>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Read-Only Status Alert */}
-          {isReadOnly && (
-            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-2xl p-4 mb-6 text-xs text-amber-800 dark:text-amber-300 font-medium">
-              This article is currently <span className="font-bold uppercase">{articleStatus}</span> and cannot be edited.
+          {articleStatus === 'pending_review' && (
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/80 rounded-2xl p-4 mb-6 text-xs text-amber-800 dark:text-amber-300 font-medium flex items-center gap-2">
+              <Lock size={16} />
+              <span>This article is currently under admin review and cannot be edited.</span>
+            </div>
+          )}
+
+          {articleStatus === 'published' && (
+            <div className="bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 rounded-2xl p-4 mb-6 text-xs text-emerald-800 dark:text-emerald-300 font-medium flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 size={16} />
+                <span>This article has been published on DevAtlas.</span>
+              </div>
+              <Link
+                to={`/articles/${id}`}
+                target="_blank"
+                className="px-3 py-1 bg-emerald-600 text-white rounded-lg text-[11px] font-semibold"
+              >
+                View Published Article
+              </Link>
             </div>
           )}
 
@@ -175,8 +241,8 @@ export function WriterArticleEditorPage() {
             </div>
           )}
 
-          {/* Form / Editor */}
-          <form onSubmit={(e) => handleSubmitForm(e, 'draft')} className="space-y-6">
+          {/* Editor Form */}
+          <form onSubmit={(e) => handleFormSubmit(e, 'draft')} className="space-y-6">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm space-y-5">
               {/* Title */}
               <div>
@@ -269,7 +335,7 @@ export function WriterArticleEditorPage() {
 
                 <button
                   type="button"
-                  onClick={(e) => handleSubmitForm(e, 'submit')}
+                  onClick={(e) => handleFormSubmit(e, articleStatus === 'changes_requested' ? 'resubmit' : 'submit')}
                   disabled={isSaving || isSubmitting}
                   className="w-full sm:w-auto px-6 py-2.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold shadow-sm transition-colors cursor-pointer inline-flex items-center justify-center gap-2 disabled:opacity-50"
                 >
@@ -287,6 +353,51 @@ export function WriterArticleEditorPage() {
           </form>
         </Container>
       </div>
+
+      {/* Submission Confirmation Modal */}
+      {showSubmitConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+            <button
+              onClick={() => setShowSubmitConfirmModal(false)}
+              className="absolute right-4 top-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+
+            <div className="w-10 h-10 rounded-full bg-brand-500/10 text-brand-500 flex items-center justify-center mb-4">
+              <Send size={20} />
+            </div>
+
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Submit Article for Editorial Review?
+            </h3>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+              Once submitted, your article will enter the admin review queue and you will not be able to edit it until an admin reviews it or requests changes.
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowSubmitConfirmModal(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => executeSaveOrSubmit(articleStatus === 'changes_requested' ? 'resubmit' : 'submit')}
+                disabled={isSubmitting}
+                className="px-5 py-2 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50"
+              >
+                {isSubmitting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+                <span>Confirm Submission</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

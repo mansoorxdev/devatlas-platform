@@ -30,9 +30,13 @@ export const authenticate = asyncWrapper(async (req, res, next) => {
   // Database retrieval errors bubble up to asyncWrapper / global error handler directly (no masking)
   const user = await userRepository.findById(decoded.id);
 
-  // Defense-in-depth: check user role is admin or writer
+  // Defense-in-depth: check user role is admin or writer and account is active
   if (!user || !['admin', 'writer'].includes(user.role)) {
     throw new AppError('Invalid or expired authentication token', 401, 'UNAUTHORIZED');
+  }
+
+  if (user.isActive === false) {
+    throw new AppError('Account deactivated. Please contact an administrator.', 403, 'ACCOUNT_DISABLED');
   }
 
   req.user = user;

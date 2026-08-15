@@ -28,6 +28,10 @@ export class AuthService {
       throw new AppError('Invalid email or password', 401, 'UNAUTHORIZED');
     }
 
+    if (user.isActive === false) {
+      throw new AppError('Account deactivated. Please contact an administrator.', 403, 'ACCOUNT_DISABLED');
+    }
+
     // Verify password hash
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
@@ -88,8 +92,8 @@ export class AuthService {
     // 3. Look up user by ID
     const user = await userRepository.findById(storedToken.userId);
 
-    // 4. Defense-in-depth: verify user exists and has valid role
-    if (!user || !['admin', 'writer'].includes(user.role)) {
+    // 4. Defense-in-depth: verify user exists, is active, and has valid role
+    if (!user || !['admin', 'writer'].includes(user.role) || user.isActive === false) {
       // Invalidate the compromised/revoked refresh token immediately
       await refreshTokenRepository.deleteToken(refreshTokenString);
       throw new AppError('Invalid or expired authentication token', 401, 'UNAUTHORIZED');

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import editorialService from '../services/editorialService';
+import ReviewHistory from './ReviewHistory';
 import {
   CheckCircle2,
   AlertCircle,
@@ -11,65 +12,53 @@ import {
   Tag,
   RefreshCw,
   Send,
+  History,
 } from 'lucide-react';
 
 export function AdminReviewModal({ article, onClose, onSuccess }) {
   const [activeAction, setActiveAction] = useState(null); // 'approve' | 'request_changes' | 'reject' | null
   const [reviewNote, setReviewNote] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const [showHistory, setShowHistory] = useState(false);
 
   if (!article) return null;
 
-  const handleApprove = async () => {
-    setIsSubmitting(true);
+  const handleActionInitiation = (actionType) => {
     setError(null);
-    try {
-      await editorialService.approveArticle(article.id);
-      onSuccess();
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to approve article.');
-    } finally {
-      setIsSubmitting(false);
+    if (actionType === 'request_changes' || actionType === 'reject') {
+      if (!reviewNote.trim() || reviewNote.trim().length < 5) {
+        setError(
+          actionType === 'request_changes'
+            ? 'Please provide feedback of at least 5 characters explaining requested changes.'
+            : 'Please provide a rejection reason of at least 5 characters.'
+        );
+        return;
+      }
     }
+    setActiveAction(actionType);
+    setShowConfirmation(true);
   };
 
-  const handleRequestChanges = async () => {
-    if (!reviewNote.trim() || reviewNote.trim().length < 5) {
-      setError('Please provide feedback of at least 5 characters explaining requested changes.');
-      return;
-    }
-
+  const handleConfirmDecision = async () => {
     setIsSubmitting(true);
     setError(null);
     try {
-      await editorialService.requestChanges(article.id, reviewNote.trim());
+      if (activeAction === 'approve') {
+        await editorialService.approveArticle(article.id);
+      } else if (activeAction === 'request_changes') {
+        await editorialService.requestChanges(article.id, reviewNote.trim());
+      } else if (activeAction === 'reject') {
+        await editorialService.rejectArticle(article.id, reviewNote.trim());
+      }
       onSuccess();
       onClose();
     } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to request changes.');
+      setError(err.response?.data?.error?.message || 'Failed to process review decision.');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleReject = async () => {
-    if (!reviewNote.trim() || reviewNote.trim().length < 5) {
-      setError('Please provide a rejection reason of at least 5 characters.');
-      return;
-    }
-
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      await editorialService.rejectArticle(article.id, reviewNote.trim());
-      onSuccess();
-      onClose();
-    } catch (err) {
-      setError(err.response?.data?.error?.message || 'Failed to reject article.');
-    } finally {
-      setIsSubmitting(false);
+      setShowConfirmation(false);
     }
   };
 
@@ -99,51 +88,69 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
-          >
-            <X size={20} />
-          </button>
+          <div className="flex items-center gap-2">
+            {article.reviewHistory?.length > 0 && (
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 transition-colors inline-flex items-center gap-1.5"
+              >
+                <History size={13} />
+                <span>{showHistory ? 'Hide Timeline' : 'Review History'}</span>
+              </button>
+            )}
+
+            <button
+              onClick={onClose}
+              className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1"
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
-        {/* Article Preview Scrollable Body */}
+        {/* Article Preview / History Scrollable Body */}
         <div className="py-5 overflow-y-auto space-y-4 flex-grow text-xs leading-relaxed text-slate-700 dark:text-slate-300">
-          <div>
-            <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
-              Summary
-            </span>
-            <p className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 italic">
-              {article.summary}
-            </p>
-          </div>
-
-          {article.tags?.length > 0 && (
-            <div>
-              <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
-                Tags
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {article.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px]"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+          {showHistory ? (
+            <ReviewHistory history={article.reviewHistory} />
+          ) : (
+            <>
+              <div>
+                <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
+                  Summary
+                </span>
+                <p className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 italic">
+                  {article.summary}
+                </p>
               </div>
-            </div>
-          )}
 
-          <div>
-            <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
-              Markdown Content
-            </span>
-            <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl font-mono text-xs whitespace-pre-wrap max-h-72 overflow-y-auto">
-              {article.content}
-            </div>
-          </div>
+              {article.tags?.length > 0 && (
+                <div>
+                  <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
+                    Tags
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {article.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px]"
+                      >
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
+                  Markdown Content
+                </span>
+                <div className="p-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl font-mono text-xs whitespace-pre-wrap max-h-72 overflow-y-auto">
+                  {article.content}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Error Alert */}
@@ -189,14 +196,13 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
 
                 <button
                   type="button"
-                  onClick={activeAction === 'request_changes' ? handleRequestChanges : handleReject}
-                  disabled={isSubmitting}
+                  onClick={() => handleActionInitiation(activeAction)}
                   className={`px-4 py-2 text-white rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5 ${
                     activeAction === 'request_changes' ? 'bg-amber-600 hover:bg-amber-500' : 'bg-red-600 hover:bg-red-500'
                   }`}
                 >
-                  {isSubmitting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
-                  <span>{activeAction === 'request_changes' ? 'Submit Feedback' : 'Confirm Reject'}</span>
+                  <Send size={13} />
+                  <span>Proceed to Confirm</span>
                 </button>
               </div>
             </div>
@@ -213,7 +219,10 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <button
                   type="button"
-                  onClick={() => setActiveAction('request_changes')}
+                  onClick={() => {
+                    setActiveAction('request_changes');
+                    setError(null);
+                  }}
                   className="flex-1 sm:flex-none px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center justify-center gap-1.5"
                 >
                   <AlertCircle size={14} />
@@ -222,7 +231,10 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
 
                 <button
                   type="button"
-                  onClick={() => setActiveAction('reject')}
+                  onClick={() => {
+                    setActiveAction('reject');
+                    setError(null);
+                  }}
                   className="flex-1 sm:flex-none px-3.5 py-2 bg-red-600 hover:bg-red-500 text-white rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center justify-center gap-1.5"
                 >
                   <XCircle size={14} />
@@ -231,11 +243,10 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
 
                 <button
                   type="button"
-                  onClick={handleApprove}
-                  disabled={isSubmitting}
-                  className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm cursor-pointer inline-flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  onClick={() => handleActionInitiation('approve')}
+                  className="flex-1 sm:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-sm cursor-pointer inline-flex items-center justify-center gap-1.5"
                 >
-                  {isSubmitting ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                  <CheckCircle2 size={14} />
                   <span>Approve & Publish</span>
                 </button>
               </div>
@@ -243,6 +254,57 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
           )}
         </div>
       </div>
+
+      {/* Decision Confirmation Modal */}
+      {showConfirmation && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
+              {activeAction === 'approve' && 'Approve & Publish Article?'}
+              {activeAction === 'request_changes' && 'Send Request for Changes?'}
+              {activeAction === 'reject' && 'Reject Article Permanently?'}
+            </h3>
+
+            <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+              {activeAction === 'approve' &&
+                'Approve and publish this article immediately to DevAtlas. It will become live and accessible to all public readers.'}
+              {activeAction === 'request_changes' &&
+                'Send this article back to the writer with your feedback notes. The writer will be notified to revise and resubmit.'}
+              {activeAction === 'reject' &&
+                'Reject this article permanently. The writer will see your rejection reason in their portal.'}
+            </p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirmation(false)}
+                className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDecision}
+                disabled={isSubmitting}
+                className={`px-5 py-2 text-white rounded-xl text-xs font-semibold cursor-pointer inline-flex items-center gap-1.5 disabled:opacity-50 ${
+                  activeAction === 'approve'
+                    ? 'bg-emerald-600 hover:bg-emerald-500'
+                    : activeAction === 'request_changes'
+                    ? 'bg-amber-600 hover:bg-amber-500'
+                    : 'bg-red-600 hover:bg-red-500'
+                }`}
+              >
+                {isSubmitting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
+                <span>
+                  {activeAction === 'approve' && 'Confirm Approval'}
+                  {activeAction === 'request_changes' && 'Confirm Request'}
+                  {activeAction === 'reject' && 'Confirm Rejection'}
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

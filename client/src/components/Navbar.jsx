@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Terminal, LogOut, User, PenTool, CheckSquare } from 'lucide-react';
+import { Menu, X, Sun, Moon, Terminal, LogOut, User, PenTool, CheckSquare, Users } from 'lucide-react';
 import { useTheme } from '../context/ThemeProvider';
 import { useAuthStore } from '@features/auth/store/useAuthStore.js';
 import { APP_PATHS } from '../constants';
@@ -92,6 +92,14 @@ export function Navbar() {
                     >
                       <CheckSquare size={13} />
                       <span>Review Queue</span>
+                    </Link>
+
+                    <Link
+                      to={APP_PATHS.ADMIN_WRITERS}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    >
+                      <Users size={13} className="text-brand-500" />
+                      <span>Writers</span>
                     </Link>
 
                     <Link
