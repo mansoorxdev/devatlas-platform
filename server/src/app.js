@@ -7,6 +7,7 @@ import apiLimiter from './middlewares/rate-limiter.middleware.js';
 import errorHandler from './middlewares/error.middleware.js';
 import routes from './routes/index.js';
 import healthRoutes from './routes/health.routes.js';
+import sitemapRoutes from './routes/sitemap.routes.js';
 import AppError from '#utils/app-error.js';
 import config from '#config/env.config.js';
 
@@ -37,8 +38,9 @@ app.use(cookieParser());
 // Morgan HTTP request logging piped through Winston
 app.use(requestLogger);
 
-// Mount health check endpoint BEFORE rate limiting is applied to /api to ensure it remains exempt
+// Mount health check & sitemap endpoints BEFORE rate limiting is applied to /api
 app.use('/api/v1/health', healthRoutes);
+app.use('/sitemap.xml', sitemapRoutes);
 
 // Rate limiting on API routes
 app.use('/api', apiLimiter);

@@ -8,6 +8,8 @@ export const APP_PATHS = {
   DEVTOOLS: '/devtools',
   ERRORS: '/errors',
   ERROR_DETAIL: '/errors/:slug',
+  TERMS: '/terms',
+  PRIVACY: '/privacy',
   ADMIN: '/portal-master',
   ADMIN_ARTICLES: '/portal-master/articles',
   ADMIN_ARTICLE_NEW: '/portal-master/articles/new',

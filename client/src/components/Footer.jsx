@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Container from './Container';
+import { APP_PATHS } from '@/constants';
 
 export function Footer() {
   return (
@@ -10,10 +11,10 @@ export function Footer() {
             © {new Date().getFullYear()} DevAtlas. All rights reserved.
           </div>
           <div className="flex gap-6">
-            <Link to="/terms" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
-              Terms of Service
+            <Link to={APP_PATHS.TERMS} className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+              Terms of Use
             </Link>
-            <Link to="/privacy" className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
+            <Link to={APP_PATHS.PRIVACY} className="hover:text-slate-900 dark:hover:text-slate-200 transition-colors">
               Privacy Policy
             </Link>
             <a

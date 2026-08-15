@@ -1,0 +1,17 @@
+# Production Crawler Configuration for DevAtlas Platform
+User-agent: *
+Allow: /
+Allow: /articles
+Allow: /snippets
+Allow: /errors
+Allow: /devtools
+Allow: /terms
+Allow: /privacy
+
+# Disallow Private & Admin Areas
+Disallow: /portal-master/
+Disallow: /portal-master
+Disallow: /api/
+
+# Sitemap Location
+Sitemap: /sitemap.xml
