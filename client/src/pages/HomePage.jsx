@@ -1,12 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link } from 'react-router-dom';
-import { homeService, HeroSearch, SearchResults } from '@/features/home';
+import {
+  homeService,
+  HeroSearch,
+  SearchResults,
+  LatestArticlesSection,
+  LatestSnippetsSection,
+  LatestErrorsSection,
+} from '@/features/home';
 import Container from '../components/Container';
-import { APP_PATHS } from '@/constants';
 
 export function HomePage() {
-  // --- Homepage Feeds State (Preserved for Step 3B) ---
+  // --- Homepage Feeds State ---
   const [latestArticles, setLatestArticles] = useState([]);
   const [latestSnippets, setLatestSnippets] = useState([]);
   const [latestErrors, setLatestErrors] = useState([]);
@@ -144,6 +149,30 @@ export function HomePage() {
             searchError={searchError}
             handleClearSearch={handleClearSearch}
             handleRetrySearch={handleRetrySearch}
+          />
+
+          {/* Step 3B: Latest Articles Section */}
+          <LatestArticlesSection
+            articles={latestArticles}
+            isLoading={isLoadingArticles}
+            error={articlesError}
+            onRetry={fetchHomepageFeeds}
+          />
+
+          {/* Step 3B: Latest Snippets Section */}
+          <LatestSnippetsSection
+            snippets={latestSnippets}
+            isLoading={isLoadingSnippets}
+            error={snippetsError}
+            onRetry={fetchHomepageFeeds}
+          />
+
+          {/* Step 3B: Latest Error Solutions Section */}
+          <LatestErrorsSection
+            errors={latestErrors}
+            isLoading={isLoadingErrors}
+            error={errorsError}
+            onRetry={fetchHomepageFeeds}
           />
         </Container>
       </div>
