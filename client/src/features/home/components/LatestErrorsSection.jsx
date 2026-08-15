@@ -66,8 +66,16 @@ export function LatestErrorsSection({
         </div>
       ) : errors.length === 0 ? (
         /* Empty State */
-        <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-center text-xs text-slate-500">
-          No error solutions published yet.
+        <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto border border-rose-200/60 dark:border-rose-900/50">
+            <AlertOctagon size={22} />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200">No Published Error Solutions Yet</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+              Real-world stack trace resolutions and troubleshooting guides will be available here soon.
+            </p>
+          </div>
         </div>
       ) : (
         /* 3-Column Error Solutions Grid */

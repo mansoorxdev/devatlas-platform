@@ -66,8 +66,16 @@ export function LatestArticlesSection({
         </div>
       ) : articles.length === 0 ? (
         /* Empty State */
-        <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-center text-xs text-slate-500">
-          No articles published yet.
+        <div className="p-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-center space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-purple-50 dark:bg-purple-950/50 text-purple-600 dark:text-purple-400 flex items-center justify-center mx-auto border border-purple-200/60 dark:border-purple-900/50">
+            <BookOpen size={22} />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200">No Published Articles Yet</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+              Our technical editorial team is crafting in-depth engineering guides. Check back soon for new articles!
+            </p>
+          </div>
         </div>
       ) : (
         /* 3-Column Articles Grid */

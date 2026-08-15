@@ -50,24 +50,66 @@ export function HomePage() {
       homeService.getLatestErrors(),
     ]);
 
+    // --- 1. Latest Articles Feed ---
     if (results[0].status === 'fulfilled' && results[0].value?.success) {
-      setLatestArticles(results[0].value.data?.items || []);
+      const items = Array.isArray(results[0].value.data?.items)
+        ? results[0].value.data.items
+        : Array.isArray(results[0].value.data)
+        ? results[0].value.data
+        : [];
+      setLatestArticles(items);
+      setArticlesError(null);
     } else {
-      setArticlesError('Unable to load latest articles.');
+      const message =
+        results[0].status === 'rejected'
+          ? results[0].reason?.response?.data?.error?.message ||
+            results[0].reason?.message ||
+            'Unable to load latest articles.'
+          : results[0].value?.error?.message || 'Unable to load latest articles.';
+      setArticlesError(message);
+      setLatestArticles([]);
     }
     setIsLoadingArticles(false);
 
+    // --- 2. Latest Snippets Feed ---
     if (results[1].status === 'fulfilled' && results[1].value?.success) {
-      setLatestSnippets(results[1].value.data?.items || []);
+      const items = Array.isArray(results[1].value.data?.items)
+        ? results[1].value.data.items
+        : Array.isArray(results[1].value.data)
+        ? results[1].value.data
+        : [];
+      setLatestSnippets(items);
+      setSnippetsError(null);
     } else {
-      setSnippetsError('Unable to load latest code snippets.');
+      const message =
+        results[1].status === 'rejected'
+          ? results[1].reason?.response?.data?.error?.message ||
+            results[1].reason?.message ||
+            'Unable to load latest code snippets.'
+          : results[1].value?.error?.message || 'Unable to load latest code snippets.';
+      setSnippetsError(message);
+      setLatestSnippets([]);
     }
     setIsLoadingSnippets(false);
 
+    // --- 3. Latest Error Solutions Feed ---
     if (results[2].status === 'fulfilled' && results[2].value?.success) {
-      setLatestErrors(results[2].value.data?.items || []);
+      const items = Array.isArray(results[2].value.data?.items)
+        ? results[2].value.data.items
+        : Array.isArray(results[2].value.data)
+        ? results[2].value.data
+        : [];
+      setLatestErrors(items);
+      setErrorsError(null);
     } else {
-      setErrorsError('Unable to load latest error solutions.');
+      const message =
+        results[2].status === 'rejected'
+          ? results[2].reason?.response?.data?.error?.message ||
+            results[2].reason?.message ||
+            'Unable to load latest error solutions.'
+          : results[2].value?.error?.message || 'Unable to load latest error solutions.';
+      setErrorsError(message);
+      setLatestErrors([]);
     }
     setIsLoadingErrors(false);
   }, []);
