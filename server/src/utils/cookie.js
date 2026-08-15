@@ -3,13 +3,13 @@ import { AUTH_COOKIE_NAME, REFRESH_COOKIE_NAME } from '#constants/auth.constants
 import { parseDurationToMs } from '#utils/duration.js';
 
 /**
- * Helper generating base secure cookie options.
+ * Helper generating environment-aware base cookie options.
  * @returns {object} Base cookie configurations.
  */
 const getBaseCookieOptions = () => ({
   httpOnly: true,
   secure: config.NODE_ENV === 'production',
-  sameSite: 'Strict',
+  sameSite: config.NODE_ENV === 'production' ? 'Lax' : 'Lax',
   path: '/',
 });
 

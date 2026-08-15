@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import requestLogger from './middlewares/request-logger.middleware.js';
-import apiLimiter from './middlewares/rate-limiter.middleware.js';
+import { publicApiLimiter } from './middlewares/rate-limiter.middleware.js';
 import errorHandler from './middlewares/error.middleware.js';
 import routes from './routes/index.js';
 import healthRoutes from './routes/health.routes.js';
@@ -19,31 +19,46 @@ app.disable('x-powered-by');
 // Trust reverse proxy for rate limiting, secure cookies, etc. in production
 app.set('trust proxy', 1);
 
-// Global security headers
-app.use(helmet());
+// Production-grade security headers compatible with React/Vite client
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    referrerPolicy: { policy: 'no-referrer-when-downgrade' },
+  })
+);
 
-// CORS configuration based on validated environment configuration
-app.use(cors({
-  origin: config.CLIENT_URL,
-  credentials: true,
-}));
+// Environment-aware CORS configuration supporting client origin & local dev origin
+const allowedOrigins = Array.from(
+  new Set([config.CLIENT_URL, 'http://localhost:5173', 'http://127.0.0.1:5173'].filter(Boolean))
+);
 
-// TODO: Add compression middleware (e.g., import compression from 'compression'; app.use(compression())) in a future phase
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. server-to-server, curl, sitemap fetchers)
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS Policy: Origin not allowed by Access-Control-Allow-Origin'));
+    },
+    credentials: true,
+  })
+);
 
-// Request parsers with 1MB body size limits to prevent body-bloating denial of service attacks
+// Request parsers with 1MB body size limits to allow code & markdown payloads while preventing body-bloating DoS attacks
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
-// Morgan HTTP request logging piped through Winston
+// Request logging piped through Winston
 app.use(requestLogger);
 
 // Mount health check & sitemap endpoints BEFORE rate limiting is applied to /api
 app.use('/api/v1/health', healthRoutes);
 app.use('/sitemap.xml', sitemapRoutes);
 
-// Rate limiting on API routes
-app.use('/api', apiLimiter);
+// General public API rate limiter (300 requests per 15 minutes)
+app.use('/api', publicApiLimiter);
 
 // Mount master API routes
 app.use('/api/v1', routes);
