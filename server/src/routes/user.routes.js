@@ -8,6 +8,34 @@ import { writerQuerySchema, toggleUserStatusSchema, updateProfileSchema } from '
 
 const router = express.Router();
 
+import { applicationQuerySchema, applicationActionSchema } from '../validators/application.validator.js';
+
+// List writer applications (Admin)
+router.get(
+  '/applications',
+  authenticate,
+  authorizeAdmin,
+  validate(applicationQuerySchema),
+  asyncWrapper(userController.getWriterApplications.bind(userController))
+);
+
+// Approve writer application (Admin)
+router.patch(
+  '/applications/:id/approve',
+  authenticate,
+  authorizeAdmin,
+  asyncWrapper(userController.approveWriterApplication.bind(userController))
+);
+
+// Reject writer application (Admin)
+router.patch(
+  '/applications/:id/reject',
+  authenticate,
+  authorizeAdmin,
+  validate(applicationActionSchema),
+  asyncWrapper(userController.rejectWriterApplication.bind(userController))
+);
+
 // List writers with stats
 router.get(
   '/writers',

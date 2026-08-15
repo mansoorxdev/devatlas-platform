@@ -116,8 +116,8 @@ export function WriterLoginPage() {
             {/* Footer Register Link */}
             <div className="text-center mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
               Don't have a writer account yet?{' '}
-              <Link to={APP_PATHS.WRITER_REGISTER} className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
-                Become a Writer
+              <Link to={APP_PATHS.WRITER_APPLY} className="font-bold text-brand-600 dark:text-brand-400 hover:underline">
+                Apply as a Writer
               </Link>
             </div>
           </div>

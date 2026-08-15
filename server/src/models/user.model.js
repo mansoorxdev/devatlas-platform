@@ -50,6 +50,29 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    writerStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'approved',
+    },
+    applicationNote: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    appliedAt: {
+      type: Date,
+      default: null,
+    },
+    reviewedAt: {
+      type: Date,
+      default: null,
+    },
+    reviewedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      default: null,
+    },
     bio: {
       type: String,
       trim: true,

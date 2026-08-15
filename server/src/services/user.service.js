@@ -216,6 +216,84 @@ export class UserService {
       },
     };
   }
+
+  /**
+   * Admin: Get paginated list of writer applications
+   */
+  async getWriterApplications(query) {
+    return userRepository.findApplicationsWithPagination(query);
+  }
+
+  /**
+   * Admin: Approve a pending writer application
+   */
+  async approveWriterApplication(id, adminId) {
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'writer') {
+      throw new AppError('Writer application not found', 404, 'NOT_FOUND');
+    }
+
+    user.writerStatus = 'approved';
+    user.isActive = true;
+    user.reviewedAt = new Date();
+    user.reviewedBy = adminId;
+    await user.save();
+
+    // Trigger notification to approved writer
+    try {
+      const { default: notificationService } = await import('./notification.service.js');
+      await notificationService.notifyUser({
+        recipient: user._id,
+        type: 'application_approved',
+        title: 'Writer Application Approved!',
+        message: 'Congratulations! Your DevAtlas writer application has been approved. You may now log in to the Writer Portal.',
+        entityType: 'user',
+        entityId: user._id,
+        link: '/writer/login',
+        eventId: `application_approved_${user._id}`,
+      });
+    } catch (e) {}
+
+    return user;
+  }
+
+  /**
+   * Admin: Reject a writer application with reason feedback
+   */
+  async rejectWriterApplication(id, adminId, reason) {
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'writer') {
+      throw new AppError('Writer application not found', 404, 'NOT_FOUND');
+    }
+
+    if (!reason || reason.trim().length < 5) {
+      throw new AppError('Rejection reason must be at least 5 characters.', 400, 'VALIDATION_FAILED');
+    }
+
+    user.writerStatus = 'rejected';
+    user.isActive = false;
+    user.applicationNote = reason.trim();
+    user.reviewedAt = new Date();
+    user.reviewedBy = adminId;
+    await user.save();
+
+    // Trigger notification to rejected applicant
+    try {
+      const { default: notificationService } = await import('./notification.service.js');
+      await notificationService.notifyUser({
+        recipient: user._id,
+        type: 'application_rejected',
+        title: 'Writer Application Decision',
+        message: `Your DevAtlas writer application was declined. Feedback: "${user.applicationNote}"`,
+        entityType: 'user',
+        entityId: user._id,
+        link: '/writer/apply',
+        eventId: `application_rejected_${user._id}`,
+      });
+    } catch (e) {}
+
+    return user;
+  }
 }
 
 export default new UserService();

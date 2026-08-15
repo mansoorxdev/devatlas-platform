@@ -10,22 +10,29 @@ import {
 
 export class AuthController {
   /**
+   * Controller handling Public Writer Application HTTP request lifecycle
+   */
+  async applyWriter(req, res, next) {
+    try {
+      const result = await authService.applyWriter(req.body);
+      res.status(201).json({
+        success: true,
+        data: result,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
    * Controller handling Public Writer Registration HTTP request lifecycle
    */
   async registerWriter(req, res, next) {
     try {
-      const { name, email, password } = req.body;
-
-      const { user, accessToken, refreshToken } = await authService.registerWriter(name, email, password);
-
-      setAccessTokenCookie(res, accessToken);
-      setRefreshTokenCookie(res, refreshToken);
-
+      const result = await authService.applyWriter(req.body);
       res.status(201).json({
         success: true,
-        data: {
-          user,
-        },
+        data: result,
       });
     } catch (error) {
       next(error);

@@ -16,10 +16,11 @@ export class AuthService {
   }
 
   /**
-   * Logical service handling Public Writer registration, password hashing, and token issuance.
-   * Server strictly forces role: 'writer' and isActive: true.
+   * Handles Public Writer Application submission.
+   * Server strictly forces role: 'writer', writerStatus: 'pending', and isActive: false.
    */
-  async registerWriter(name, email, password) {
+  async applyWriter(payload) {
+    const { name, email, password, bio = '', expertise = [], avatar = DEFAULT_AVATAR_ID } = payload;
     const normalizedEmail = email.trim().toLowerCase();
 
     // Check duplicate email
@@ -28,52 +29,52 @@ export class AuthService {
       throw new AppError('An account with this email address already exists.', 409, 'DUPLICATE_EMAIL');
     }
 
-    // Force role: 'writer', isActive: true, and assign default avatar server-side
+    // Server forces role: 'writer', writerStatus: 'pending', isActive: false
     const user = await userRepository.create({
       name: name.trim(),
       email: normalizedEmail,
       password,
       role: 'writer',
-      isActive: true,
-      avatar: DEFAULT_AVATAR_ID,
+      writerStatus: 'pending',
+      isActive: false,
+      appliedAt: new Date(),
+      bio: bio.trim(),
+      expertise: Array.isArray(expertise) ? expertise : [],
+      avatar: avatar || DEFAULT_AVATAR_ID,
       avatarType: 'default',
     });
-
-    // Access payload
-    const accessPayload = {
-      id: user._id.toString(),
-      role: user.role,
-    };
-
-    const refreshPayload = {
-      id: user._id.toString(),
-    };
-
-    const accessToken = generateAccessToken(accessPayload);
-    const refreshToken = generateRefreshToken(refreshPayload);
-
-    const expiresAt = this.getRefreshTokenExpiry();
-    await refreshTokenRepository.create(user._id, refreshToken, expiresAt);
 
     // Trigger admin notification asynchronously
     try {
       const { default: notificationService } = await import('./notification.service.js');
       await notificationService.notifyAdmins({
-        type: 'new_writer_registered',
-        title: 'New Writer Registered',
-        message: `Writer "${user.name}" registered on DevAtlas.`,
+        type: 'new_writer_application',
+        title: 'New Writer Application Submitted',
+        message: `Writer applicant "${user.name}" (${user.email}) submitted an application for review.`,
         entityType: 'user',
         entityId: user._id,
-        link: '/portal-master/writers',
-        eventIdPrefix: `register_writer_${user._id}`,
+        link: '/portal-master/writer-applications',
+        eventIdPrefix: `writer_application_${user._id}`,
       });
     } catch (e) {}
 
     return {
-      user,
-      accessToken,
-      refreshToken,
+      message: 'Writer application submitted successfully. Your application is pending administrator review.',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        writerStatus: user.writerStatus,
+        appliedAt: user.appliedAt,
+      },
     };
+  }
+
+  /**
+   * Alias for backward compatibility — delegates to applyWriter.
+   */
+  async registerWriter(name, email, password) {
+    return this.applyWriter({ name, email, password });
   }
 
   /**
@@ -88,6 +89,17 @@ export class AuthService {
     // Defense-in-depth: generic message to prevent email enumeration attacks
     if (!user || !['admin', 'writer'].includes(user.role)) {
       throw new AppError('Invalid email or password', 401, 'UNAUTHORIZED');
+    }
+
+    // Check writer application status before general active check
+    if (user.role === 'writer') {
+      if (user.writerStatus === 'pending') {
+        throw new AppError('Your writer application is currently pending admin review.', 403, 'APPLICATION_PENDING');
+      }
+      if (user.writerStatus === 'rejected') {
+        const note = user.applicationNote ? `: "${user.applicationNote}"` : '';
+        throw new AppError(`Your writer application was declined by an administrator${note}`, 403, 'APPLICATION_REJECTED');
+      }
     }
 
     if (user.isActive === false) {

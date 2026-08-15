@@ -56,6 +56,38 @@ export const userService = {
     const response = await apiClient.get(`/users/authors/${slug}`, { params });
     return response.data;
   },
+
+  /**
+   * Submit a new public Writer Application.
+   */
+  async applyWriter(payload) {
+    const response = await apiClient.post('/auth/writer/apply', payload);
+    return response.data;
+  },
+
+  /**
+   * Fetch paginated list of writer applications (Admin).
+   */
+  async getWriterApplications(params = {}) {
+    const response = await apiClient.get('/users/applications', { params });
+    return response.data;
+  },
+
+  /**
+   * Approve a pending writer application (Admin).
+   */
+  async approveWriterApplication(id) {
+    const response = await apiClient.patch(`/users/applications/${id}/approve`);
+    return response.data;
+  },
+
+  /**
+   * Reject a writer application with reason feedback (Admin).
+   */
+  async rejectWriterApplication(id, rejectionReason) {
+    const response = await apiClient.patch(`/users/applications/${id}/reject`, { rejectionReason });
+    return response.data;
+  },
 };
 
 export default userService;

@@ -52,11 +52,11 @@ const runWriterRegistrationTests = async () => {
     console.assert(registerRes.status === 201, `Expected 201 on registration, got ${registerRes.status}`);
     const regBody = await registerRes.json();
     const createdUser = regBody.data.user;
-    console.assert(createdUser.role === 'writer', `Expected role 'writer', got ${createdUser.role}`);
-    console.assert(createdUser.isActive === true, 'Registered writer default isActive must be true');
-    console.log('  ✅ PASS: Writer registers successfully; status 201, role: "writer", isActive: true');
+    console.assert(createdUser.writerStatus === 'pending', 'Registered writer default status must be pending');
+    console.log('  ✅ PASS: Writer application submitted successfully; status: 201, writerStatus: "pending"');
 
-    const registeredCookie = extractCookieHeader(registerRes);
+    // Approve test writer in DB to proceed with login & portal access tests
+    await User.findByIdAndUpdate(createdUser.id, { writerStatus: 'approved', isActive: true });
 
     // 2. Test Privilege Escalation Protection: Payload containing role: 'admin' fails validation (.strict())
     const escalationRes = await fetch(`${BASE_URL}/api/v1/auth/writer/register`, {

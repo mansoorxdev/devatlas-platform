@@ -8,12 +8,22 @@ import { authLoginLimiter, authRefreshLimiter } from '#middlewares/rate-limiter.
 
 const router = express.Router();
 
-// Mount public Writer Registration route
+import { writerApplySchema } from '../validators/application.validator.js';
+
+// Mount public Writer Application route
+router.post(
+  '/writer/apply',
+  authLoginLimiter,
+  validate(writerApplySchema),
+  asyncWrapper(authController.applyWriter.bind(authController))
+);
+
+// Mount public Writer Registration route (legacy alias delegating to application flow)
 router.post(
   '/writer/register',
   authLoginLimiter,
-  validate(registerWriterSchema),
-  asyncWrapper(authController.registerWriter.bind(authController))
+  validate(writerApplySchema),
+  asyncWrapper(authController.applyWriter.bind(authController))
 );
 
 // Mount login route with strict brute-force rate limiter, validation, and async wrapper

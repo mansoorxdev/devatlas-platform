@@ -108,6 +108,42 @@ export class UserRepository {
   }
 
   /**
+   * Get paginated list of writer applications with status filter and search
+   */
+  async findApplicationsWithPagination({ page = 1, limit = 10, search = '', status = 'pending' }) {
+    const filter = { role: 'writer' };
+
+    if (status !== 'all') {
+      filter.writerStatus = status;
+    }
+
+    if (search && search.trim() !== '') {
+      const searchRegex = new RegExp(search.trim(), 'i');
+      filter.$or = [{ name: searchRegex }, { email: searchRegex }];
+    }
+
+    const skip = (page - 1) * limit;
+    const total = await User.countDocuments(filter);
+    const users = await User.find(filter)
+      .sort({ appliedAt: -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .select('name email role writerStatus applicationNote appliedAt reviewedAt reviewedBy bio avatar avatarType expertise socialLinks isActive');
+
+    const pages = Math.ceil(total / limit) || 1;
+
+    return {
+      items: users,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages,
+      },
+    };
+  }
+
+  /**
    * Find public author by slug, selecting ONLY public profile fields and excluding sensitive data
    */
   async findAuthorBySlug(slug) {

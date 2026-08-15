@@ -10,6 +10,7 @@ import {
   Terminal,
   LayoutDashboard,
   User,
+  UserCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@features/auth/store/useAuthStore.js';
 import { APP_PATHS } from '@/constants';
@@ -20,6 +21,14 @@ export function AdminDashboard() {
   const logout = useAuthStore((state) => state.logout);
 
   const adminModules = [
+    {
+      label: 'Writer Applications',
+      description: 'Review contributor onboarding applications, evaluate bios, and approve writers.',
+      path: APP_PATHS.ADMIN_WRITER_APPLICATIONS,
+      icon: UserCheck,
+      active: true,
+      color: 'from-amber-600 to-indigo-600',
+    },
     {
       label: 'Articles',
       description: 'Manage platform tutorials, technical guides, and architectural breakdowns.',

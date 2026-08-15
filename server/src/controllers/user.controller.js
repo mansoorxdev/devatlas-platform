@@ -92,6 +92,41 @@ export class UserController {
       data: result,
     });
   }
+
+  /**
+   * Admin endpoint: Get writer applications
+   */
+  async getWriterApplications(req, res) {
+    const result = await userService.getWriterApplications(req.query);
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  }
+
+  /**
+   * Admin endpoint: Approve writer application
+   */
+  async approveWriterApplication(req, res) {
+    const user = await userService.approveWriterApplication(req.params.id, req.user.id);
+    res.status(200).json({
+      success: true,
+      message: 'Writer application approved successfully',
+      data: { user },
+    });
+  }
+
+  /**
+   * Admin endpoint: Reject writer application
+   */
+  async rejectWriterApplication(req, res) {
+    const user = await userService.rejectWriterApplication(req.params.id, req.user.id, req.body.rejectionReason);
+    res.status(200).json({
+      success: true,
+      message: 'Writer application rejected',
+      data: { user },
+    });
+  }
 }
 
 export default new UserController();

@@ -22,7 +22,7 @@ const TermsPage = lazy(() => import('../pages/TermsPage'));
 const PrivacyPage = lazy(() => import('../pages/PrivacyPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const WriterLoginPage = lazy(() => import('../pages/WriterLoginPage'));
-const WriterRegisterPage = lazy(() => import('../pages/WriterRegisterPage'));
+const WriterApplyPage = lazy(() => import('../pages/WriterApplyPage'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
@@ -30,6 +30,7 @@ const AdminReviewQueuePage = lazy(() => import('../pages/AdminReviewQueuePage'))
 const AdminWritersPage = lazy(() => import('../pages/AdminWritersPage'));
 const AdminWriterPerformancePage = lazy(() => import('../pages/AdminWriterPerformancePage'));
 const AdminAssignmentsPage = lazy(() => import('../pages/AdminAssignmentsPage'));
+const AdminWriterApplicationsPage = lazy(() => import('../pages/AdminWriterApplicationsPage'));
 const WriterDashboardPage = lazy(() => import('../pages/WriterDashboardPage'));
 const WriterArticleEditorPage = lazy(() => import('../pages/WriterArticleEditorPage'));
 const WriterProfilePage = lazy(() => import('../pages/WriterProfilePage'));
@@ -130,8 +131,12 @@ export function AppRoutes() {
               element: withSuspense(WriterLoginPage),
             },
             {
+              path: 'apply',
+              element: withSuspense(WriterApplyPage),
+            },
+            {
               path: 'register',
-              element: withSuspense(WriterRegisterPage),
+              element: withSuspense(WriterApplyPage),
             },
           ],
         },
@@ -213,6 +218,10 @@ export function AppRoutes() {
         {
           path: 'writers/assignments',
           element: withSuspense(AdminAssignmentsPage),
+        },
+        {
+          path: 'writer-applications',
+          element: withSuspense(AdminWriterApplicationsPage),
         },
         {
           path: 'notifications',
