@@ -11,6 +11,20 @@ export function PrivacyPage() {
           name="description"
           content="DevAtlas Privacy Policy. How authentication cookies, browser storage, and technical data are handled."
         />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Privacy Policy | DevAtlas" />
+        <meta
+          property="og:description"
+          content="DevAtlas Privacy Policy. How authentication cookies, browser storage, and technical data are handled."
+        />
+        <meta property="og:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Privacy Policy | DevAtlas" />
+        <meta
+          name="twitter:description"
+          content="DevAtlas Privacy Policy. How authentication cookies, browser storage, and technical data are handled."
+        />
+        <meta name="twitter:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-12">

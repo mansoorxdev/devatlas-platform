@@ -11,6 +11,20 @@ export function TermsPage() {
           name="description"
           content="DevAtlas Terms of Use. Guidelines, developer content licensing, platform usage, and disclaimers."
         />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Terms of Use | DevAtlas" />
+        <meta
+          property="og:description"
+          content="DevAtlas Terms of Use. Guidelines, developer content licensing, platform usage, and disclaimers."
+        />
+        <meta property="og:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Terms of Use | DevAtlas" />
+        <meta
+          name="twitter:description"
+          content="DevAtlas Terms of Use. Guidelines, developer content licensing, platform usage, and disclaimers."
+        />
+        <meta name="twitter:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-12">

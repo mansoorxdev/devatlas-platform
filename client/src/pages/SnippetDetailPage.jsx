@@ -100,9 +100,11 @@ export function SnippetDetailPage() {
         {snippet && <meta property="og:description" content={snippet.summary || snippet.title} />}
         {snippet && <meta property="og:type" content="article" />}
         {snippet && <meta property="og:url" content={canonicalUrl} />}
+        {snippet && <meta property="og:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />}
         {snippet && <meta name="twitter:card" content="summary_large_image" />}
         {snippet && <meta name="twitter:title" content={`${snippet.title} | DevAtlas`} />}
         {snippet && <meta name="twitter:description" content={snippet.summary || snippet.title} />}
+        {snippet && <meta name="twitter:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />}
       </Helmet>
 
       <div className="py-12 bg-slate-50/50 dark:bg-slate-950/50 min-h-[calc(100vh-4rem)]">

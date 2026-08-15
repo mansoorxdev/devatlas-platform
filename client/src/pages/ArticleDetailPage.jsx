@@ -80,9 +80,11 @@ export function ArticleDetailPage() {
         {article && <meta property="og:description" content={article.summary} />}
         {article && <meta property="og:type" content="article" />}
         {article && <meta property="og:url" content={canonicalUrl} />}
+        {article && <meta property="og:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />}
         {article && <meta name="twitter:card" content="summary_large_image" />}
         {article && <meta name="twitter:title" content={`${article.title} | DevAtlas`} />}
         {article && <meta name="twitter:description" content={article.summary} />}
+        {article && <meta name="twitter:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />}
       </Helmet>
 
       <div className="py-12 bg-slate-50/50 dark:bg-slate-950/50 min-h-[calc(100vh-4rem)]">

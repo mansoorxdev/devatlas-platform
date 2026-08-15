@@ -45,6 +45,20 @@ export function DevToolsPage() {
           name="description"
           content="Browser-based developer utilities for formatting JSON, inspecting JWT tokens, generating UUIDs, and encoding text safely client-side."
         />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={pageTitle} />
+        <meta
+          property="og:description"
+          content="Browser-based developer utilities for formatting JSON, inspecting JWT tokens, generating UUIDs, and encoding text safely client-side."
+        />
+        <meta property="og:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta
+          name="twitter:description"
+          content="Browser-based developer utilities for formatting JSON, inspecting JWT tokens, generating UUIDs, and encoding text safely client-side."
+        />
+        <meta name="twitter:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
       </Helmet>
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10">

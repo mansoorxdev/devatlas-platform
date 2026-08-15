@@ -102,6 +102,20 @@ export function ArticlesPage() {
           name="description"
           content="Explore practical developer articles, tutorials, and engineering insights on DevAtlas."
         />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Articles | DevAtlas" />
+        <meta
+          property="og:description"
+          content="Explore practical developer articles, tutorials, and engineering insights on DevAtlas."
+        />
+        <meta property="og:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Articles | DevAtlas" />
+        <meta
+          name="twitter:description"
+          content="Explore practical developer articles, tutorials, and engineering insights on DevAtlas."
+        />
+        <meta name="twitter:image" content={`${(import.meta.env.VITE_CLIENT_URL || window.location.origin).replace(/\/$/, '')}/og-image.png`} />
       </Helmet>
 
       <div className="py-12 bg-slate-50/50 dark:bg-slate-950/50 min-h-[calc(100vh-4rem)]">

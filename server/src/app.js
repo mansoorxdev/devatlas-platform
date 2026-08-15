@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import requestLogger from './middlewares/request-logger.middleware.js';
 import { publicApiLimiter } from './middlewares/rate-limiter.middleware.js';
@@ -18,6 +19,9 @@ app.disable('x-powered-by');
 
 // Trust reverse proxy for rate limiting, secure cookies, etc. in production
 app.set('trust proxy', 1);
+
+// Gzip/Brotli HTTP response compression middleware for optimal network payload delivery
+app.use(compression());
 
 // Production-grade security headers compatible with React/Vite client
 app.use(
