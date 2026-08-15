@@ -13,6 +13,10 @@ import {
   RefreshCw,
   Send,
   History,
+  BookOpen,
+  Image as ImageIcon,
+  FileText,
+  Sparkles,
 } from 'lucide-react';
 
 export function AdminReviewModal({ article, onClose, onSuccess }) {
@@ -65,16 +69,29 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
   const authorName = article.author?.name || 'Unknown Writer';
   const authorEmail = article.author?.email || '';
 
+  const wordCount = article.content ? article.content.trim().split(/\s+/).filter(Boolean).length : 0;
+  const charCount = article.content ? article.content.length : 0;
+  const readTime = article.readTime || Math.max(1, Math.ceil(wordCount / 200));
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative my-8 max-h-[90vh] flex flex-col">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 shadow-2xl relative my-8 max-h-[90vh] flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between pb-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 text-xs font-semibold mb-2">
-              <MessageSquare size={14} />
-              <span>Editorial Review</span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="inline-flex items-center gap-1 px-3 py-0.5 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-semibold">
+                <MessageSquare size={13} />
+                <span>Editorial Review Preview</span>
+              </span>
+              {article.assignment && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 text-[10px] font-extrabold border border-indigo-200 dark:border-indigo-800">
+                  <BookOpen size={10} />
+                  <span>FROM ASSIGNED BRIEF</span>
+                </span>
+              )}
             </div>
+
             <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">{article.title}</h2>
             <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1">
               <span className="inline-flex items-center gap-1">
@@ -114,6 +131,22 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
             <ReviewHistory history={article.reviewHistory} />
           ) : (
             <>
+              {/* Featured Image Preview */}
+              {article.featuredImage && (
+                <div className="relative rounded-2xl overflow-hidden max-h-48 border border-slate-200 dark:border-slate-800">
+                  <img src={article.featuredImage} alt={article.title} className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              {/* Metrics & Categorization Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 text-[11px]">
+                <div>Category: <strong className="text-slate-900 dark:text-slate-100">{article.category || 'Backend'}</strong></div>
+                <div>Language: <strong className="text-slate-900 dark:text-slate-100">{article.language || 'English'}</strong></div>
+                <div>Word Count: <strong className="text-slate-900 dark:text-slate-100">{wordCount} words ({readTime}m read)</strong></div>
+                <div>Char Count: <strong className="text-slate-900 dark:text-slate-100">{charCount} chars</strong></div>
+              </div>
+
+              {/* Summary */}
               <div>
                 <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
                   Summary
@@ -123,6 +156,18 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
                 </p>
               </div>
 
+              {/* SEO Targets */}
+              {(article.seoTitle || article.seoDescription) && (
+                <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 space-y-1">
+                  <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
+                    SEO Metadata Preview
+                  </span>
+                  {article.seoTitle && <div><strong>SEO Title:</strong> {article.seoTitle} ({article.seoTitle.length} chars)</div>}
+                  {article.seoDescription && <div><strong>SEO Meta Description:</strong> {article.seoDescription} ({article.seoDescription.length} chars)</div>}
+                </div>
+              )}
+
+              {/* Tags */}
               {article.tags?.length > 0 && (
                 <div>
                   <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
@@ -132,7 +177,7 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
                     {article.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px]"
+                        className="px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 font-mono text-[11px]"
                       >
                         #{tag}
                       </span>
@@ -141,6 +186,7 @@ export function AdminReviewModal({ article, onClose, onSuccess }) {
                 </div>
               )}
 
+              {/* Markdown Content */}
               <div>
                 <span className="font-bold block text-slate-900 dark:text-slate-100 uppercase tracking-wider text-[11px] mb-1">
                   Markdown Content

@@ -25,6 +25,14 @@ router.get(
   asyncWrapper(userController.getWriterById.bind(userController))
 );
 
+// Get writer performance analytics
+router.get(
+  '/writers/:id/performance',
+  authenticate,
+  authorizeAdmin,
+  asyncWrapper(userController.getWriterPerformance.bind(userController))
+);
+
 // Toggle writer status (activate / deactivate)
 router.patch(
   '/writers/:id/status',

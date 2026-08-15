@@ -18,6 +18,14 @@ export const userService = {
   },
 
   /**
+   * Get writer performance analytics by ID (Admin only).
+   */
+  async getWriterPerformance(id) {
+    const response = await apiClient.get(`/users/writers/${id}/performance`);
+    return response.data;
+  },
+
+  /**
    * Toggle writer active/inactive status.
    */
   async toggleWriterStatus(id, isActive) {

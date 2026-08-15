@@ -89,9 +89,13 @@ export const articleQuerySchema = z.object({
       search: z.string().trim().optional(),
       tag: z.string().trim().toLowerCase().optional(),
       status: z.enum(['draft', 'pending_review', 'changes_requested', 'rejected', 'published', 'all']).optional(),
+      writer: z.string().optional(),
+      category: z.string().optional(),
+      language: z.string().optional(),
+      isAssigned: z.enum(['true', 'false', 'all']).optional(),
       sort: z.string().optional(),
     })
-    .optional(),
+    .passthrough(),
 });
 
 /**
@@ -137,6 +141,8 @@ export const writerCreateArticleSchema = z.object({
       featuredImage: z.string().trim().optional().default(''),
       seoTitle: z.string().trim().max(200).optional().default(''),
       seoDescription: z.string().trim().max(300).optional().default(''),
+      category: z.string().trim().max(50).optional().default('Backend'),
+      language: z.string().trim().max(50).optional().default('English'),
       assignmentId: z.string().optional(),
       action: z
         .enum(['draft', 'submit'], {
@@ -180,6 +186,8 @@ export const writerUpdateArticleSchema = z.object({
       featuredImage: z.string().trim().optional(),
       seoTitle: z.string().trim().max(200).optional(),
       seoDescription: z.string().trim().max(300).optional(),
+      category: z.string().trim().max(50).optional(),
+      language: z.string().trim().max(50).optional(),
       assignmentId: z.string().optional(),
       action: z
         .enum(['draft', 'submit', 'resubmit'], {

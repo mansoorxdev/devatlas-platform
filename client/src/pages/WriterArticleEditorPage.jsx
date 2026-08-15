@@ -371,6 +371,71 @@ export function WriterArticleEditorPage() {
             </div>
           )}
 
+          {/* Content Quality Indicators Panel */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 mb-6 shadow-sm">
+            <div className="flex items-center justify-between gap-2 mb-3">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Sparkles size={14} className="text-brand-500" />
+                <span>Editorial Content Quality Checks</span>
+              </span>
+              <span className="text-[10px] text-slate-400">Live Quality Indicators</span>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              {/* Title Check */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Title Length</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{formData.title.length} chars</span>
+                </div>
+                {formData.title.length >= 10 && formData.title.length <= 100 ? (
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                ) : (
+                  <AlertCircle size={16} className="text-amber-500 shrink-0" />
+                )}
+              </div>
+
+              {/* Word Count Check */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Words / Read Time</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{metrics.wordCount}w • {metrics.readTime}m</span>
+                </div>
+                {metrics.wordCount >= 100 ? (
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                ) : (
+                  <AlertCircle size={16} className="text-amber-500 shrink-0" />
+                )}
+              </div>
+
+              {/* SEO Title Target */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">SEO Title (~60c)</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{formData.seoTitle.length}/60</span>
+                </div>
+                {formData.seoTitle.length > 0 && formData.seoTitle.length <= 70 ? (
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                ) : (
+                  <AlertCircle size={16} className="text-amber-500 shrink-0" />
+                )}
+              </div>
+
+              {/* Featured Image Check */}
+              <div className="p-3 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200/60 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Featured Image</span>
+                  <span className="font-bold text-slate-800 dark:text-slate-200">{formData.featuredImage ? 'Provided' : 'Missing'}</span>
+                </div>
+                {formData.featuredImage ? (
+                  <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
+                ) : (
+                  <AlertCircle size={16} className="text-amber-500 shrink-0" />
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Error Banner */}
           {error && (
             <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 p-4 rounded-2xl mb-6 text-xs text-rose-600 dark:text-rose-400 font-medium flex items-center gap-2">

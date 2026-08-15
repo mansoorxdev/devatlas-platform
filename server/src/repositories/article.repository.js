@@ -30,6 +30,17 @@ export class ArticleRepository {
   }
 
   /**
+   * Find an existing article by author ID and case-insensitive title.
+   */
+  async findByAuthorAndTitle(authorId, title) {
+    const trimmedTitle = title.trim();
+    return await Article.findOne({
+      author: authorId,
+      title: { $regex: new RegExp(`^${trimmedTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') },
+    });
+  }
+
+  /**
    * Check if a slug exists, optionally excluding a specific article ID (for updates).
    * @param {string} slug - Slug string to check.
    * @param {string} [excludeId] - Optional article ID to exclude.

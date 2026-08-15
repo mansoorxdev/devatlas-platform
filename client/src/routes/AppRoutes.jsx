@@ -28,6 +28,7 @@ const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
 const AdminReviewQueuePage = lazy(() => import('../pages/AdminReviewQueuePage'));
 const AdminWritersPage = lazy(() => import('../pages/AdminWritersPage'));
+const AdminWriterPerformancePage = lazy(() => import('../pages/AdminWriterPerformancePage'));
 const AdminAssignmentsPage = lazy(() => import('../pages/AdminAssignmentsPage'));
 const WriterDashboardPage = lazy(() => import('../pages/WriterDashboardPage'));
 const WriterArticleEditorPage = lazy(() => import('../pages/WriterArticleEditorPage'));
@@ -204,6 +205,10 @@ export function AppRoutes() {
         {
           path: 'writers',
           element: withSuspense(AdminWritersPage),
+        },
+        {
+          path: 'writers/:id',
+          element: withSuspense(AdminWriterPerformancePage),
         },
         {
           path: 'writers/assignments',

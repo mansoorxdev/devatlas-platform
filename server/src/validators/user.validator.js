@@ -12,8 +12,9 @@ export const writerQuerySchema = z.object({
         .optional()
         .transform((val) => (val ? Math.min(100, Math.max(1, parseInt(val, 10) || 10)) : 10)),
       search: z.string().trim().optional().default(''),
+      status: z.enum(['all', 'active', 'deactivated']).optional().default('all'),
     })
-    .optional(),
+    .passthrough(),
 });
 
 export const toggleUserStatusSchema = z.object({

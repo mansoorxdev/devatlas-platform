@@ -28,6 +28,18 @@ export class UserController {
   }
 
   /**
+   * Protected Admin endpoint: Get comprehensive writer performance analytics.
+   */
+  async getWriterPerformance(req, res) {
+    const result = await userService.getWriterPerformance(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  }
+
+  /**
    * Protected Admin endpoint: Toggle writer active/inactive status.
    */
   async toggleWriterStatus(req, res) {

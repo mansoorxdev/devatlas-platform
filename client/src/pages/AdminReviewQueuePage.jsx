@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
 import editorialService from '../services/editorialService';
+import userService from '../services/userService';
 import AdminReviewModal from '../components/AdminReviewModal';
 import { APP_PATHS } from '../constants';
 import {
@@ -16,8 +17,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ArrowLeft,
-  MessageSquare,
-  History,
+  Filter,
+  BookOpen,
 } from 'lucide-react';
 
 const STATUS_BADGES = {
@@ -44,21 +45,39 @@ export function AdminReviewQueuePage() {
 
   // URL-synchronized filters
   const activeStatus = searchParams.get('status') || 'pending_review';
+  const selectedWriter = searchParams.get('writer') || 'all';
+  const selectedCategory = searchParams.get('category') || 'all';
+  const selectedLanguage = searchParams.get('language') || 'all';
+  const selectedIsAssigned = searchParams.get('isAssigned') || 'all';
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
   const searchQuery = searchParams.get('search') || '';
 
   const [queueItems, setQueueItems] = useState([]);
   const [pagination, setPagination] = useState({ page: 1, pages: 1, total: 0 });
+  const [writers, setWriters] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Review modal target article
   const [selectedArticle, setSelectedArticle] = useState(null);
 
+  useEffect(() => {
+    fetchWritersList();
+  }, []);
+
+  const fetchWritersList = async () => {
+    try {
+      const res = await userService.getWriters({ limit: 100 });
+      if (res.success && res.data?.items) {
+        setWriters(res.data.items);
+      }
+    } catch (err) {}
+  };
+
   const updateFilters = (newParams) => {
     const nextParams = new URLSearchParams(searchParams);
     Object.entries(newParams).forEach(([key, value]) => {
-      if (value === null || value === '' || (key === 'status' && value === 'pending_review') || (key === 'page' && value === 1)) {
+      if (value === null || value === '' || value === 'all' || (key === 'status' && value === 'pending_review') || (key === 'page' && value === 1)) {
         nextParams.delete(key);
       } else {
         nextParams.set(key, value);
@@ -74,6 +93,10 @@ export function AdminReviewQueuePage() {
       const res = await editorialService.getReviewQueue({
         page: currentPage,
         status: activeStatus,
+        writer: selectedWriter,
+        category: selectedCategory,
+        language: selectedLanguage,
+        isAssigned: selectedIsAssigned,
         search: searchQuery,
       });
 
@@ -86,7 +109,7 @@ export function AdminReviewQueuePage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, activeStatus, searchQuery]);
+  }, [currentPage, activeStatus, selectedWriter, selectedCategory, selectedLanguage, selectedIsAssigned, searchQuery]);
 
   useEffect(() => {
     fetchReviewQueue();
@@ -100,7 +123,7 @@ export function AdminReviewQueuePage() {
 
       <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 py-10">
         <Container className="max-w-6xl">
-          {/* Top Bar */}
+          {/* Top Navigation */}
           <div className="flex items-center justify-between gap-4 mb-6">
             <Link
               to={APP_PATHS.ADMIN}
@@ -114,34 +137,35 @@ export function AdminReviewQueuePage() {
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200 dark:border-slate-800 mb-8">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-500 text-xs font-semibold mb-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-semibold mb-2">
                 <CheckSquare size={14} />
-                <span>Editorial Workflow</span>
+                <span>Editorial Governance</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Article Review Queue</h1>
               <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-                Review contributor submissions, request changes, or approve and publish to DevAtlas.
+                Review submitted writer articles, request revisions, and approve publications.
               </p>
             </div>
           </div>
 
-          {/* Filters & Search */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 mb-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-            {/* Status Tabs */}
-            <div className="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+          {/* Filters & Search Toolbar */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm mb-6 space-y-4">
+            {/* Status Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-4">
               {[
                 { id: 'pending_review', label: 'Pending Review' },
                 { id: 'changes_requested', label: 'Changes Requested' },
                 { id: 'rejected', label: 'Rejected' },
-                { id: 'all', label: 'All Review Items' },
+                { id: 'published', label: 'Published' },
+                { id: 'all', label: 'All Articles' },
               ].map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => updateFilters({ status: tab.id, page: 1 })}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors cursor-pointer ${
                     activeStatus === tab.id
-                      ? 'bg-brand-600 text-white font-semibold shadow-sm'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      ? 'bg-brand-600 text-white shadow-sm'
+                      : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
                   }`}
                 >
                   {tab.label}
@@ -149,27 +173,75 @@ export function AdminReviewQueuePage() {
               ))}
             </div>
 
-            {/* Search Input */}
-            <div className="relative w-full md:w-72">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search title or writer name..."
-                value={searchQuery}
-                onChange={(e) => updateFilters({ search: e.target.value, page: 1 })}
-                className="w-full pl-9 pr-3 py-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
-              />
+            {/* Sub-Filters Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+              {/* Search */}
+              <div className="relative sm:col-span-2">
+                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  placeholder="Search title, summary, or author..."
+                  value={searchQuery}
+                  onChange={(e) => updateFilters({ search: e.target.value, page: 1 })}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs text-slate-900 dark:text-slate-100 focus:outline-none"
+                />
+              </div>
+
+              {/* Writer Filter */}
+              <div>
+                <select
+                  value={selectedWriter}
+                  onChange={(e) => updateFilters({ writer: e.target.value, page: 1 })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none"
+                >
+                  <option value="all">All Writers</option>
+                  {writers.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Assignment Filter */}
+              <div>
+                <select
+                  value={selectedIsAssigned}
+                  onChange={(e) => updateFilters({ isAssigned: e.target.value, page: 1 })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none"
+                >
+                  <option value="all">All Submissions</option>
+                  <option value="true">Assigned Briefs Only</option>
+                  <option value="false">Self-Created Only</option>
+                </select>
+              </div>
+
+              {/* Category Filter */}
+              <div>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => updateFilters({ category: e.target.value, page: 1 })}
+                  className="w-full px-3 py-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-medium text-slate-700 dark:text-slate-300 focus:outline-none"
+                >
+                  <option value="all">All Categories</option>
+                  <option value="Backend">Backend</option>
+                  <option value="Frontend">Frontend</option>
+                  <option value="DevOps">DevOps</option>
+                  <option value="Database">Database</option>
+                  <option value="Security">Security</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          {/* Queue Content */}
+          {/* Queue List */}
           {isLoading ? (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center shadow-sm">
               <RefreshCw size={24} className="mx-auto text-brand-500 animate-spin mb-3" />
               <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Loading review queue...</p>
             </div>
           ) : error ? (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center shadow-sm">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-8 text-center shadow-sm">
               <AlertCircle size={32} className="mx-auto text-rose-500 mb-2" />
               <p className="text-xs text-rose-500 font-medium">{error}</p>
               <button
@@ -180,73 +252,76 @@ export function AdminReviewQueuePage() {
               </button>
             </div>
           ) : queueItems.length === 0 ? (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-12 text-center shadow-sm">
-              <CheckSquare size={40} className="mx-auto text-emerald-400 mb-3" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Review Queue Clear</h3>
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-12 text-center shadow-sm">
+              <CheckSquare size={40} className="mx-auto text-slate-300 dark:text-slate-700 mb-3" />
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Review Queue Empty</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
-                {activeStatus === 'pending_review'
-                  ? 'All contributor submissions have been reviewed!'
-                  : 'No articles match the selected review criteria.'}
+                No articles matching this status or filter criteria.
               </p>
             </div>
           ) : (
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 dark:bg-slate-950/80 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
                     <tr>
-                      <th className="py-3.5 px-4">Submitted Article</th>
-                      <th className="py-3.5 px-4">Writer</th>
-                      <th className="py-3.5 px-4">Status</th>
-                      <th className="py-3.5 px-4">History</th>
-                      <th className="py-3.5 px-4">Updated</th>
-                      <th className="py-3.5 px-4 text-right">Action</th>
+                      <th className="py-4 px-6">Submitted Article</th>
+                      <th className="py-4 px-6">Author</th>
+                      <th className="py-4 px-6">Source</th>
+                      <th className="py-4 px-6">Status</th>
+                      <th className="py-4 px-6">Submitted Date</th>
+                      <th className="py-4 px-6 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60 font-medium">
                     {queueItems.map((article) => {
                       const badge = STATUS_BADGES[article.status] || STATUS_BADGES.pending_review;
-                      const formattedDate = new Date(article.updatedAt || article.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      });
-
-                      const authorName = article.author?.name || 'Unknown Author';
-                      const authorEmail = article.author?.email || '';
-                      const historyCount = article.reviewHistory?.length || 0;
-
                       return (
                         <tr key={article.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                          <td className="py-3.5 px-4 max-w-xs sm:max-w-md">
-                            <div className="font-bold text-slate-900 dark:text-slate-100 truncate">{article.title}</div>
-                            <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{article.summary}</div>
+                          <td className="py-4 px-6">
+                            <div className="font-bold text-slate-900 dark:text-slate-100 line-clamp-1 max-w-xs">{article.title}</div>
+                            <div className="text-[10px] text-slate-400 mt-0.5">{article.category} • {article.readTime || 1} min read</div>
                           </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap">
-                            <div className="font-semibold text-slate-800 dark:text-slate-200">{authorName}</div>
-                            <div className="text-[11px] text-slate-400">{authorEmail}</div>
+
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <div className="flex items-center gap-2">
+                              {article.author?.avatar ? (
+                                <img src={article.author.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
+                              ) : (
+                                <User size={14} className="text-slate-400" />
+                              )}
+                              <span className="font-semibold text-slate-800 dark:text-slate-200">{article.author?.name || 'Writer'}</span>
+                            </div>
                           </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${badge.color}`}>
+
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            {article.assignment ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
+                                <BookOpen size={10} />
+                                <span>ASSIGNED</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-400 font-semibold uppercase">Self-Created</span>
+                            )}
+                          </td>
+
+                          <td className="py-4 px-6 whitespace-nowrap">
+                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase border ${badge.color}`}>
                               {badge.label}
                             </span>
                           </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
-                            <span className="inline-flex items-center gap-1 font-mono text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
-                              <History size={11} />
-                              <span>{historyCount} entries</span>
-                            </span>
+
+                          <td className="py-4 px-6 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
+                            {new Date(article.updatedAt || article.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap text-slate-500 dark:text-slate-400 text-[11px]">
-                            {formattedDate}
-                          </td>
-                          <td className="py-3.5 px-4 whitespace-nowrap text-right">
+
+                          <td className="py-4 px-6 whitespace-nowrap text-right">
                             <button
                               onClick={() => setSelectedArticle(article)}
-                              className="px-3 py-1.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-semibold text-xs transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
+                              className="px-3 py-1.5 bg-brand-600 hover:bg-brand-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer inline-flex items-center gap-1.5 shadow-sm"
                             >
                               <Eye size={13} />
-                              <span>Review Submission</span>
+                              <span>Review Article</span>
                             </button>
                           </td>
                         </tr>
@@ -286,12 +361,15 @@ export function AdminReviewQueuePage() {
         </Container>
       </div>
 
-      {/* Review Modal */}
+      {/* Editorial Review Modal */}
       {selectedArticle && (
         <AdminReviewModal
           article={selectedArticle}
           onClose={() => setSelectedArticle(null)}
-          onSuccess={fetchReviewQueue}
+          onActionSuccess={() => {
+            setSelectedArticle(null);
+            fetchReviewQueue();
+          }}
         />
       )}
     </>

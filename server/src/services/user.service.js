@@ -1,31 +1,16 @@
 import userRepository from '#repositories/user.repository.js';
 import articleRepository from '#repositories/article.repository.js';
+import Article from '#models/article.model.js';
+import ArticleAssignment from '#models/assignment.model.js';
 import AppError from '#utils/app-error.js';
 
 export class UserService {
   /**
-   * Get list of writers with article stats breakdown.
+   * Get list of writers with status filter and article/assignment stats breakdown.
    */
   async getWriters(query) {
-    const { page, limit, search } = query;
-    const result = await userRepository.findWritersWithPagination({ page, limit, search });
-
-    // Aggregate article stats for each writer
-    const itemsWithStats = await Promise.all(
-      result.items.map(async (writer) => {
-        const stats = await articleRepository.countByAuthorAndStatus(writer._id);
-        const userObj = writer.toJSON ? writer.toJSON() : writer;
-        return {
-          ...userObj,
-          stats,
-        };
-      })
-    );
-
-    return {
-      items: itemsWithStats,
-      pagination: result.pagination,
-    };
+    const { page, limit, search, status } = query;
+    return userRepository.findWritersWithPagination({ page, limit, search, status });
   }
 
   /**
@@ -43,6 +28,96 @@ export class UserService {
     return {
       ...userObj,
       stats,
+    };
+  }
+
+  /**
+   * Admin Endpoint: Get comprehensive writer performance analytics.
+   */
+  async getWriterPerformance(id) {
+    const user = await userRepository.findById(id);
+    if (!user || user.role !== 'writer') {
+      throw new AppError('Writer not found', 404, 'NOT_FOUND');
+    }
+
+    const [
+      draftCount,
+      pendingCount,
+      changesRequestedCount,
+      publishedCount,
+      rejectedCount,
+      totalArticles,
+      assignedCount,
+      inProgressCount,
+      submittedCount,
+      completedCount,
+      cancelledCount,
+      totalAssignments,
+      recentArticles,
+      recentAssignments,
+    ] = await Promise.all([
+      Article.countDocuments({ author: id, status: 'draft' }),
+      Article.countDocuments({ author: id, status: 'pending_review' }),
+      Article.countDocuments({ author: id, status: 'changes_requested' }),
+      Article.countDocuments({ author: id, status: 'published' }),
+      Article.countDocuments({ author: id, status: 'rejected' }),
+      Article.countDocuments({ author: id }),
+      ArticleAssignment.countDocuments({ writer: id, status: 'assigned' }),
+      ArticleAssignment.countDocuments({ writer: id, status: 'in_progress' }),
+      ArticleAssignment.countDocuments({ writer: id, status: 'submitted' }),
+      ArticleAssignment.countDocuments({ writer: id, status: 'completed' }),
+      ArticleAssignment.countDocuments({ writer: id, status: 'cancelled' }),
+      ArticleAssignment.countDocuments({ writer: id }),
+      Article.find({ author: id }).sort({ createdAt: -1 }).limit(5),
+      ArticleAssignment.find({ writer: id }).sort({ createdAt: -1 }).limit(5),
+    ]);
+
+    const totalSubmitted = publishedCount + rejectedCount + changesRequestedCount + pendingCount;
+    const publicationRate = totalSubmitted > 0 ? Math.round((publishedCount / totalSubmitted) * 100) : 0;
+    const assignmentCompletionRate = totalAssignments > 0 ? Math.round((completedCount / totalAssignments) * 100) : 0;
+
+    const userProfile = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      slug: user.slug,
+      avatar: user.avatar,
+      bio: user.bio,
+      expertise: user.expertise,
+      socialLinks: user.socialLinks,
+      role: user.role,
+      isActive: user.isActive,
+      createdAt: user.createdAt,
+    };
+
+    return {
+      writer: userProfile,
+      articleStats: {
+        total: totalArticles,
+        draft: draftCount,
+        pending_review: pendingCount,
+        changes_requested: changesRequestedCount,
+        published: publishedCount,
+        rejected: rejectedCount,
+      },
+      assignmentStats: {
+        total: totalAssignments,
+        assigned: assignedCount,
+        in_progress: inProgressCount,
+        submitted: submittedCount,
+        completed: completedCount,
+        cancelled: cancelledCount,
+      },
+      performanceMetrics: {
+        articlesSubmitted: totalSubmitted,
+        articlesPublished: publishedCount,
+        articlesRejected: rejectedCount,
+        changesRequested: changesRequestedCount,
+        publicationRate,
+        assignmentCompletionRate,
+      },
+      recentArticles,
+      recentAssignments,
     };
   }
 

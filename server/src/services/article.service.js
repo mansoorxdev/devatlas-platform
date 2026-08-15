@@ -239,7 +239,30 @@ export class ArticleService {
    * Author ID is assigned strictly from req.user.id server-side.
    */
   async createWriterArticle(writerId, payload) {
-    const { title, summary, content, tags = [], featuredImage, seoTitle, seoDescription, assignmentId, action = 'draft' } = payload;
+    const {
+      title,
+      summary,
+      content,
+      tags = [],
+      featuredImage,
+      seoTitle,
+      seoDescription,
+      category,
+      language,
+      assignmentId,
+      action = 'draft',
+    } = payload;
+
+    // Check duplicate title for same author
+    const existingSameTitle = await articleRepository.findByAuthorAndTitle(writerId, title);
+    if (existingSameTitle) {
+      throw new AppError(
+        'You already have an article with this exact title. Please choose a unique title for your article.',
+        400,
+        'DUPLICATE_ARTICLE_TITLE'
+      );
+    }
+
     const slug = await this.generateUniqueSlug(title);
     const readTime = this.calculateReadTime(content);
     const targetStatus = action === 'submit' ? 'pending_review' : 'draft';
@@ -390,8 +413,17 @@ export class ArticleService {
 
     const updateData = {};
 
-    if (payload.title && payload.title !== existingArticle.title) {
-      updateData.title = payload.title;
+    if (payload.title && payload.title.trim() !== existingArticle.title) {
+      const existingSameTitle = await articleRepository.findByAuthorAndTitle(writerId, payload.title);
+      if (existingSameTitle && existingSameTitle._id.toString() !== id.toString()) {
+        throw new AppError(
+          'You already have an article with this exact title. Please choose a unique title for your article.',
+          400,
+          'DUPLICATE_ARTICLE_TITLE'
+        );
+      }
+
+      updateData.title = payload.title.trim();
       updateData.slug = await this.generateUniqueSlug(payload.title, id);
     }
 
@@ -485,10 +517,21 @@ export class ArticleService {
   }
 
   /**
-   * Fetch editorial review queue for Admin users.
+   * Fetch editorial review queue for Admin users with advanced filters.
    */
   async getAdminReviewQueue(query = {}) {
-    const { page = 1, limit = 10, search = '', tag = '', status = 'pending_review', sort = '-updatedAt' } = query;
+    const {
+      page = 1,
+      limit = 10,
+      search = '',
+      tag = '',
+      status = 'pending_review',
+      writer,
+      category,
+      language,
+      isAssigned,
+      sort = '-updatedAt',
+    } = query;
 
     const filter = {};
     if (status && status !== 'all') {
@@ -497,16 +540,20 @@ export class ArticleService {
       filter.status = { $in: ['pending_review', 'changes_requested', 'rejected'] };
     }
 
-    if (tag) {
-      filter.tags = tag.toLowerCase();
-    }
+    if (tag) filter.tags = tag.toLowerCase();
+    if (writer) filter.author = writer;
+    if (category) filter.category = category;
+    if (language) filter.language = language;
+
+    if (isAssigned === 'true') filter.assignment = { $ne: null };
+    if (isAssigned === 'false') filter.assignment = null;
 
     const sortOption = sort === 'oldest' ? { updatedAt: 1 } : { updatedAt: -1 };
 
     return articleRepository.findWithPagination({
       filter,
-      page,
-      limit,
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
       sort: sortOption,
       search,
     });
