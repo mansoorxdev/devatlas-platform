@@ -181,9 +181,18 @@ export function ArticleDetailPage() {
                         {article.author?.name ? article.author.name[0].toUpperCase() : 'M'}
                       </div>
                       <div>
-                        <div className="font-semibold text-slate-900 dark:text-slate-200 text-sm">
-                          {article.author?.name || 'DevAtlas Team'}
-                        </div>
+                        {article.author?.slug ? (
+                          <Link
+                            to={`/authors/${article.author.slug}`}
+                            className="font-semibold text-slate-900 dark:text-slate-200 hover:text-brand-600 dark:hover:text-brand-400 transition-colors text-sm"
+                          >
+                            {article.author.name}
+                          </Link>
+                        ) : (
+                          <div className="font-semibold text-slate-900 dark:text-slate-200 text-sm">
+                            {article.author?.name || 'DevAtlas Team'}
+                          </div>
+                        )}
                         <div className="text-[11px] text-slate-400">Published on {formattedDate}</div>
                       </div>
                     </div>

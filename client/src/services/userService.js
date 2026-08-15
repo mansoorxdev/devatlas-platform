@@ -40,6 +40,14 @@ export const userService = {
     const response = await apiClient.patch('/users/profile', data);
     return response.data;
   },
+
+  /**
+   * Fetch public author profile by slug with published articles.
+   */
+  async getPublicAuthorProfile(slug, params = {}) {
+    const response = await apiClient.get(`/users/authors/${slug}`, { params });
+    return response.data;
+  },
 };
 
 export default userService;

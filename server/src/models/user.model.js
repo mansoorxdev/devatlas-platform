@@ -1,6 +1,16 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
 
+const slugify = (text) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-');
+};
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -9,6 +19,14 @@ const userSchema = new mongoose.Schema(
       trim: true,
       minlength: [2, 'Name must be at least 2 characters'],
       maxlength: [100, 'Name must not exceed 100 characters'],
+    },
+    slug: {
+      type: String,
+      unique: true,
+      sparse: true,
+      trim: true,
+      lowercase: true,
+      index: true,
     },
     email: {
       type: String,
@@ -58,10 +76,24 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Hash password before saving to database and normalize email using async/await
+// Hash password before saving to database, normalize email, and auto-generate unique slug
 userSchema.pre('save', async function () {
   if (this.email) {
     this.email = this.email.trim().toLowerCase();
+  }
+
+  // Auto-generate or update unique author slug handling collisions (-1, -2)
+  if (this.isModified('name') || !this.slug) {
+    let baseSlug = slugify(this.name);
+    if (!baseSlug) baseSlug = 'author';
+
+    let uniqueSlug = baseSlug;
+    let count = 1;
+    while (await mongoose.models.User.findOne({ slug: uniqueSlug, _id: { $ne: this._id } })) {
+      uniqueSlug = `${baseSlug}-${count}`;
+      count++;
+    }
+    this.slug = uniqueSlug;
   }
 
   if (!this.isModified('password')) return;

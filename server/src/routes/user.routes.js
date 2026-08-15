@@ -49,4 +49,10 @@ router.patch(
   asyncWrapper(userController.updateProfile.bind(userController))
 );
 
+// Public Author profile endpoint (no auth required)
+router.get(
+  '/authors/:slug',
+  asyncWrapper(userController.getPublicAuthorProfile.bind(userController))
+);
+
 export default router;

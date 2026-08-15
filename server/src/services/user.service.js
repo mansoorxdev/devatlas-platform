@@ -97,6 +97,38 @@ export class UserService {
     await user.save();
     return user;
   }
+
+  /**
+   * Public endpoint logic to retrieve author profile by slug with published articles.
+   */
+  async getPublicAuthorProfile(slug, query = {}) {
+    const author = await userRepository.findAuthorBySlug(slug);
+    if (!author) {
+      throw new AppError('Author not found', 404, 'NOT_FOUND');
+    }
+
+    const { page = 1, limit = 10 } = query;
+
+    // Fetch ONLY published articles by this author
+    const articleResult = await articleRepository.findWithPagination({
+      filter: {
+        author: author._id || author.id,
+        status: 'published',
+      },
+      page,
+      limit,
+      sort: { publishedAt: -1, createdAt: -1 },
+    });
+
+    return {
+      author,
+      articles: articleResult.items,
+      pagination: articleResult.pagination,
+      stats: {
+        publishedArticlesCount: articleResult.pagination.total,
+      },
+    };
+  }
 }
 
 export default new UserService();

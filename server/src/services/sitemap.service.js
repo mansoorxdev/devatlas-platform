@@ -28,7 +28,7 @@ export class SitemapService {
    */
   async generateSitemapXml() {
     const baseUrl = config.CLIENT_URL.replace(/\/$/, '');
-    const { articles, snippets, errors } = await sitemapRepository.getPublishedSitemapData();
+    const { articles, snippets, errors, authors = [] } = await sitemapRepository.getPublishedSitemapData();
 
     const staticRoutes = [
       { loc: `${baseUrl}/` },
@@ -71,6 +71,18 @@ export class SitemapService {
     for (const err of errors) {
       const loc = `${baseUrl}/errors/${err.slug}`;
       const lastmod = formatDate(err.updatedAt || err.publishedAt);
+      xmlEntries += `  <url>\n    <loc>${escapeXml(loc)}</loc>\n`;
+      if (lastmod) {
+        xmlEntries += `    <lastmod>${escapeXml(lastmod)}</lastmod>\n`;
+      }
+      xmlEntries += `  </url>\n`;
+    }
+
+    // Render public Author profiles
+    for (const author of authors) {
+      if (!author.slug) continue;
+      const loc = `${baseUrl}/authors/${author.slug}`;
+      const lastmod = formatDate(author.updatedAt);
       xmlEntries += `  <url>\n    <loc>${escapeXml(loc)}</loc>\n`;
       if (lastmod) {
         xmlEntries += `    <lastmod>${escapeXml(lastmod)}</lastmod>\n`;

@@ -64,10 +64,20 @@ export function ArticleCard({ article }) {
       {/* Footer Meta & Read Link */}
       <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
-            <User size={13} className="text-slate-400" />
-            {article.author?.name || 'DevAtlas'}
-          </span>
+          {article.author?.slug ? (
+            <Link
+              to={`/authors/${article.author.slug}`}
+              className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+            >
+              <User size={13} className="text-slate-400" />
+              {article.author.name}
+            </Link>
+          ) : (
+            <span className="flex items-center gap-1 font-medium text-slate-700 dark:text-slate-300">
+              <User size={13} className="text-slate-400" />
+              {article.author?.name || 'DevAtlas'}
+            </span>
+          )}
           <span>•</span>
           <span className="flex items-center gap-1">
             <Calendar size={13} className="text-slate-400" />

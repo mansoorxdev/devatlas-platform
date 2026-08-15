@@ -70,6 +70,31 @@ export class UserRepository {
       { returnDocument: 'after', runValidators: true }
     );
   }
+
+  /**
+   * Find public author by slug, selecting ONLY public profile fields and excluding sensitive data
+   */
+  async findAuthorBySlug(slug) {
+    // Backfill if needed
+    await this.backfillMissingSlugs();
+
+    const user = await User.findOne({
+      slug: slug.toLowerCase(),
+      isActive: { $ne: false },
+    }).select('name slug bio avatar expertise socialLinks role');
+
+    return user;
+  }
+
+  /**
+   * Backfill missing slugs for existing users in database (Admin and Writer migration)
+   */
+  async backfillMissingSlugs() {
+    const usersWithoutSlug = await User.find({ $or: [{ slug: { $exists: false } }, { slug: null }, { slug: '' }] });
+    for (const user of usersWithoutSlug) {
+      await user.save(); // Triggers pre-save hook to generate unique slug
+    }
+  }
 }
 
 export default new UserRepository();

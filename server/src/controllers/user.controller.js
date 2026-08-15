@@ -68,6 +68,18 @@ export class UserController {
       },
     });
   }
+
+  /**
+   * Public endpoint: Get public author profile by slug with published articles.
+   */
+  async getPublicAuthorProfile(req, res) {
+    const result = await userService.getPublicAuthorProfile(req.params.slug, req.query);
+
+    res.status(200).json({
+      success: true,
+      data: result,
+    });
+  }
 }
 
 export default new UserController();

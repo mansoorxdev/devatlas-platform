@@ -3,6 +3,7 @@ export const APP_PATHS = {
   LOGIN: '/portal-master/login',
   ARTICLES: '/articles',
   ARTICLE_DETAIL: '/articles/:slug',
+  AUTHOR_DETAIL: '/authors/:slug',
   SNIPPETS: '/snippets',
   SNIPPET_DETAIL: '/snippets/:slug',
   DEVTOOLS: '/devtools',

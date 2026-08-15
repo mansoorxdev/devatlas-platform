@@ -12,6 +12,7 @@ import GuestRoute from '../features/auth/components/GuestRoute.jsx';
 const HomePage = lazy(() => import('../pages/HomePage'));
 const ArticlesPage = lazy(() => import('../pages/ArticlesPage'));
 const ArticleDetailPage = lazy(() => import('../pages/ArticleDetailPage'));
+const AuthorProfilePage = lazy(() => import('../pages/AuthorProfilePage'));
 const SnippetsPage = lazy(() => import('../pages/SnippetsPage'));
 const SnippetDetailPage = lazy(() => import('../pages/SnippetDetailPage'));
 const ErrorsPage = lazy(() => import('../pages/ErrorsPage'));
@@ -61,6 +62,10 @@ export function AppRoutes() {
         {
           path: 'articles/:slug',
           element: withSuspense(ArticleDetailPage),
+        },
+        {
+          path: 'authors/:slug',
+          element: withSuspense(AuthorProfilePage),
         },
         {
           path: 'snippets',
