@@ -84,17 +84,24 @@ export function Navbar() {
                       <span>Writer Portal</span>
                     </Link>
                     <Link
-                      to={APP_PATHS.WRITER_PROFILE}
+                      to={APP_PATHS.WRITER_ASSIGNMENTS}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
                     >
-                      <User size={13} className="text-brand-500" />
-                      <span>Profile</span>
+                      <FileText size={13} className="text-brand-500" />
+                      <span>Assignments</span>
                     </Link>
                   </>
                 )}
 
                 {user?.role === 'admin' && (
                   <>
+                    <Link
+                      to={APP_PATHS.ADMIN_ASSIGNMENTS}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold hover:bg-indigo-500/20 transition-colors"
+                    >
+                      <FileText size={13} />
+                      <span>Briefs</span>
+                    </Link>
                     <Link
                       to={APP_PATHS.ADMIN_REVIEW_QUEUE}
                       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-semibold hover:bg-amber-500/20 transition-colors"

@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import Container from '../components/Container';
 import writerService from '../services/writerService';
+import assignmentService from '../services/assignmentService';
 import { APP_PATHS } from '../constants';
 import {
   ArrowLeft,
@@ -61,6 +62,32 @@ export function WriterArticleEditorPage() {
   const [error, setError] = useState(null);
   const [hasAutosaveDraft, setHasAutosaveDraft] = useState(false);
   const [autosaveNotice, setAutosaveNotice] = useState(null);
+
+  const [searchParams] = useSearchParams();
+  const assignmentId = searchParams.get('assignmentId');
+  const [linkedAssignment, setLinkedAssignment] = useState(null);
+
+  // Load assignment context if creating from assignment
+  useEffect(() => {
+    if (assignmentId && !isEditing) {
+      const fetchAssignmentContext = async () => {
+        try {
+          const res = await assignmentService.getWriterAssignmentById(assignmentId);
+          if (res.success && res.data?.assignment) {
+            const assig = res.data.assignment;
+            setLinkedAssignment(assig);
+            setFormData((prev) => ({
+              ...prev,
+              title: prev.title || assig.title,
+              summary: prev.summary || assig.brief.substring(0, 490),
+              tags: prev.tags?.length ? prev.tags : assig.targetKeywords || [],
+            }));
+          }
+        } catch (err) {}
+      };
+      fetchAssignmentContext();
+    }
+  }, [assignmentId, isEditing]);
 
   // Confirmation Modal state
   const [showSubmitConfirmModal, setShowSubmitConfirmModal] = useState(false);
@@ -212,6 +239,10 @@ export function WriterArticleEditorPage() {
       seoDescription: formData.seoDescription.trim(),
       action,
     };
+
+    if (assignmentId) {
+      payload.assignmentId = assignmentId;
+    }
 
     if (action === 'submit' || action === 'resubmit') setIsSubmitting(true);
     else setIsSaving(true);

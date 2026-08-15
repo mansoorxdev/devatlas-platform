@@ -85,6 +85,12 @@ const articleSchema = new mongoose.Schema(
       default: null,
       index: true,
     },
+    assignment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ArticleAssignment',
+      default: null,
+      index: true,
+    },
   },
   {
     timestamps: true,

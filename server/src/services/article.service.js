@@ -1,4 +1,5 @@
 import articleRepository from '#repositories/article.repository.js';
+import assignmentRepository from '#repositories/assignment.repository.js';
 import AppError from '#utils/app-error.js';
 
 export class ArticleService {
@@ -237,7 +238,7 @@ export class ArticleService {
    * Author ID is assigned strictly from req.user.id server-side.
    */
   async createWriterArticle(writerId, payload) {
-    const { title, summary, content, tags = [], action = 'draft' } = payload;
+    const { title, summary, content, tags = [], featuredImage, seoTitle, seoDescription, assignmentId, action = 'draft' } = payload;
     const slug = await this.generateUniqueSlug(title);
     const readTime = this.calculateReadTime(content);
     const targetStatus = action === 'submit' ? 'pending_review' : 'draft';
@@ -248,11 +249,29 @@ export class ArticleService {
       summary,
       content,
       tags,
+      featuredImage: featuredImage || '',
+      seoTitle: seoTitle || '',
+      seoDescription: seoDescription || '',
       status: targetStatus,
       author: writerId,
       readTime,
       publishedAt: null,
     };
+
+    if (assignmentId) {
+      const assignment = await assignmentRepository.findById(assignmentId);
+      if (!assignment) {
+        throw new AppError('Linked assignment not found', 404, 'NOT_FOUND');
+      }
+      const assignWriterId = assignment.writer._id?.toString() || assignment.writer.toString();
+      if (assignWriterId !== writerId.toString()) {
+        throw new AppError('Access denied. You do not own this assignment', 403, 'FORBIDDEN');
+      }
+      if (assignment.status === 'cancelled') {
+        throw new AppError('Cannot create article for a cancelled assignment', 400, 'BAD_REQUEST');
+      }
+      articleData.assignment = assignment._id;
+    }
 
     if (action === 'submit') {
       articleData.reviewHistory = [
@@ -265,7 +284,14 @@ export class ArticleService {
       ];
     }
 
-    return articleRepository.create(articleData);
+    const createdArticle = await articleRepository.create(articleData);
+
+    if (assignmentId) {
+      const newAssignmentStatus = action === 'submit' ? 'submitted' : 'in_progress';
+      await assignmentRepository.linkArticle(assignmentId, createdArticle._id, newAssignmentStatus);
+    }
+
+    return createdArticle;
   }
 
   /**
@@ -395,6 +421,10 @@ export class ArticleService {
       createdAt: new Date(),
     };
 
+    if (article.assignment) {
+      await assignmentRepository.updateStatus(article.assignment._id || article.assignment, 'submitted');
+    }
+
     return articleRepository.updateById(id, {
       ...updateData,
       $push: { reviewHistory: historyEntry },
@@ -450,6 +480,10 @@ export class ArticleService {
       reviewedBy: adminId,
       createdAt: new Date(),
     };
+
+    if (article.assignment) {
+      await assignmentRepository.updateStatus(article.assignment._id || article.assignment, 'completed');
+    }
 
     return articleRepository.updateById(id, {
       ...updateData,

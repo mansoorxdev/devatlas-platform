@@ -137,6 +137,7 @@ export const writerCreateArticleSchema = z.object({
       featuredImage: z.string().trim().optional().default(''),
       seoTitle: z.string().trim().max(200).optional().default(''),
       seoDescription: z.string().trim().max(300).optional().default(''),
+      assignmentId: z.string().optional(),
       action: z
         .enum(['draft', 'submit'], {
           errorMap: () => ({ message: "Action must be 'draft' or 'submit'" }),
@@ -179,6 +180,7 @@ export const writerUpdateArticleSchema = z.object({
       featuredImage: z.string().trim().optional(),
       seoTitle: z.string().trim().max(200).optional(),
       seoDescription: z.string().trim().max(300).optional(),
+      assignmentId: z.string().optional(),
       action: z
         .enum(['draft', 'submit', 'resubmit'], {
           errorMap: () => ({ message: "Action must be 'draft', 'submit', or 'resubmit'" }),

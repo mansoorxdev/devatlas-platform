@@ -6,6 +6,7 @@ import snippetRoutes from './snippet.routes.js';
 import errorRoutes from './error.routes.js';
 import searchRoutes from './search.routes.js';
 import sitemapRoutes from './sitemap.routes.js';
+import assignmentRoutes from './assignment.routes.js';
 
 const router = express.Router();
 
@@ -26,5 +27,6 @@ router.use('/snippets', snippetRoutes);
 router.use('/errors', errorRoutes);
 router.use('/search', searchRoutes);
 router.use('/sitemap.xml', sitemapRoutes);
+router.use('/assignments', assignmentRoutes);
 
 export default router;

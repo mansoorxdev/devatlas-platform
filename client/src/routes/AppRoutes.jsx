@@ -28,9 +28,11 @@ const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
 const AdminReviewQueuePage = lazy(() => import('../pages/AdminReviewQueuePage'));
 const AdminWritersPage = lazy(() => import('../pages/AdminWritersPage'));
+const AdminAssignmentsPage = lazy(() => import('../pages/AdminAssignmentsPage'));
 const WriterDashboardPage = lazy(() => import('../pages/WriterDashboardPage'));
 const WriterArticleEditorPage = lazy(() => import('../pages/WriterArticleEditorPage'));
 const WriterProfilePage = lazy(() => import('../pages/WriterProfilePage'));
+const WriterAssignmentsPage = lazy(() => import('../pages/WriterAssignmentsPage'));
 const AdminSnippetsPage = lazy(() => import('../pages/AdminSnippetsPage'));
 const AdminSnippetEditorPage = lazy(() => import('../pages/AdminSnippetEditorPage'));
 const AdminErrorsPage = lazy(() => import('../pages/AdminErrorsPage'));
@@ -150,6 +152,10 @@ export function AppRoutes() {
               element: withSuspense(WriterProfilePage),
             },
             {
+              path: 'assignments',
+              element: withSuspense(WriterAssignmentsPage),
+            },
+            {
               path: 'articles',
               element: withSuspense(WriterDashboardPage),
             },
@@ -193,6 +199,10 @@ export function AppRoutes() {
         {
           path: 'writers',
           element: withSuspense(AdminWritersPage),
+        },
+        {
+          path: 'writers/assignments',
+          element: withSuspense(AdminAssignmentsPage),
         },
         {
           path: 'snippets',
