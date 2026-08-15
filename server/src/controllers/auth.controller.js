@@ -10,7 +10,30 @@ import {
 
 export class AuthController {
   /**
-   * Controller handling Admin login HTTP request lifecycle
+   * Controller handling Public Writer Registration HTTP request lifecycle
+   */
+  async registerWriter(req, res, next) {
+    try {
+      const { name, email, password } = req.body;
+
+      const { user, accessToken, refreshToken } = await authService.registerWriter(name, email, password);
+
+      setAccessTokenCookie(res, accessToken);
+      setRefreshTokenCookie(res, refreshToken);
+
+      res.status(201).json({
+        success: true,
+        data: {
+          user,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * Controller handling Admin/Writer login HTTP request lifecycle
    */
   async login(req, res, next) {
     try {

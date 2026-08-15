@@ -32,7 +32,19 @@ export const useAuthStore = create((set) => ({
   },
 
   /**
-   * Authenticate admin with email and password.
+   * Register a new public writer account.
+   */
+  registerWriter: async (name, email, password) => {
+    const data = await authService.registerWriter(name, email, password);
+    set({
+      user: data.data.user,
+      isAuthenticated: true,
+    });
+    return data;
+  },
+
+  /**
+   * Authenticate admin or writer with email and password.
    */
   login: async (email, password) => {
     const data = await authService.login(email, password);

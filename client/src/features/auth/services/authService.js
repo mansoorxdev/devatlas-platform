@@ -7,9 +7,21 @@ import { API_ENDPOINTS } from '@/constants';
  */
 export const authService = {
   /**
-   * Authenticate admin with email and password.
-   * @param {string} email - Admin email address.
-   * @param {string} password - Admin password.
+   * Register a new writer contributor.
+   * @param {string} name - Writer full name.
+   * @param {string} email - Writer email address.
+   * @param {string} password - Writer password.
+   * @returns {Promise<object>} Response containing user data.
+   */
+  async registerWriter(name, email, password) {
+    const response = await apiClient.post('/auth/writer/register', { name, email, password });
+    return response.data;
+  },
+
+  /**
+   * Authenticate admin or writer with email and password.
+   * @param {string} email - User email address.
+   * @param {string} password - User password.
    * @returns {Promise<object>} Response containing user data.
    */
   async login(email, password) {

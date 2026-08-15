@@ -1,13 +1,20 @@
 import express from 'express';
 import authController from '#controllers/auth.controller.js';
 import validate from '#middlewares/validation.middleware.js';
-import { loginSchema } from '#validators/auth.validator.js';
+import { loginSchema, registerWriterSchema } from '#validators/auth.validator.js';
 import authenticate from '#middlewares/auth.middleware.js';
-import authorizeAdmin from '#middlewares/admin.middleware.js';
 import asyncWrapper from '#utils/async-wrapper.js';
 import { authLoginLimiter, authRefreshLimiter } from '#middlewares/rate-limiter.middleware.js';
 
 const router = express.Router();
+
+// Mount public Writer Registration route
+router.post(
+  '/writer/register',
+  authLoginLimiter,
+  validate(registerWriterSchema),
+  asyncWrapper(authController.registerWriter.bind(authController))
+);
 
 // Mount login route with strict brute-force rate limiter, validation, and async wrapper
 router.post(
@@ -17,11 +24,10 @@ router.post(
   asyncWrapper(authController.login.bind(authController))
 );
 
-// Mount me route with authentication and authorization check middlewares
+// Mount me route with authentication middleware (accessible to any authenticated admin or writer)
 router.get(
   '/me',
   authenticate,
-  authorizeAdmin,
   asyncWrapper(authController.getMe.bind(authController))
 );
 

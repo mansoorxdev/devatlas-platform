@@ -20,6 +20,8 @@ const DevToolsPage = lazy(() => import('../pages/DevToolsPage'));
 const TermsPage = lazy(() => import('../pages/TermsPage'));
 const PrivacyPage = lazy(() => import('../pages/PrivacyPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
+const WriterLoginPage = lazy(() => import('../pages/WriterLoginPage'));
+const WriterRegisterPage = lazy(() => import('../pages/WriterRegisterPage'));
 const AdminDashboard = lazy(() => import('../pages/AdminDashboard'));
 const AdminArticlesPage = lazy(() => import('../pages/AdminArticlesPage'));
 const AdminArticleEditorPage = lazy(() => import('../pages/AdminArticleEditorPage'));
@@ -89,7 +91,7 @@ export function AppRoutes() {
         },
       ],
     },
-    // Guest-only sign in route
+    // Guest-only Admin sign in route
     {
       path: 'portal-master',
       element: <GuestRoute />,
@@ -100,6 +102,26 @@ export function AppRoutes() {
             {
               path: 'login',
               element: withSuspense(LoginPage),
+            },
+          ],
+        },
+      ],
+    },
+    // Guest-only Writer authentication routes
+    {
+      path: 'writer',
+      element: <GuestRoute />,
+      children: [
+        {
+          element: <MainLayout />,
+          children: [
+            {
+              path: 'login',
+              element: withSuspense(WriterLoginPage),
+            },
+            {
+              path: 'register',
+              element: withSuspense(WriterRegisterPage),
             },
           ],
         },

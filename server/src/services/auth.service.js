@@ -15,7 +15,52 @@ export class AuthService {
   }
 
   /**
-   * Logical service handling Admin login authentication, token signing, and session storage
+   * Logical service handling Public Writer registration, password hashing, and token issuance.
+   * Server strictly forces role: 'writer' and isActive: true.
+   */
+  async registerWriter(name, email, password) {
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Check duplicate email
+    const existingUser = await userRepository.findByEmail(normalizedEmail);
+    if (existingUser) {
+      throw new AppError('An account with this email address already exists.', 409, 'DUPLICATE_EMAIL');
+    }
+
+    // Force role: 'writer' and isActive: true server-side
+    const user = await userRepository.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password,
+      role: 'writer',
+      isActive: true,
+    });
+
+    // Access payload
+    const accessPayload = {
+      id: user._id.toString(),
+      role: user.role,
+    };
+
+    const refreshPayload = {
+      id: user._id.toString(),
+    };
+
+    const accessToken = generateAccessToken(accessPayload);
+    const refreshToken = generateRefreshToken(refreshPayload);
+
+    const expiresAt = this.getRefreshTokenExpiry();
+    await refreshTokenRepository.create(user._id, refreshToken, expiresAt);
+
+    return {
+      user,
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  /**
+   * Logical service handling Admin/Writer login authentication, token signing, and session storage
    */
   async login(email, password) {
     const normalizedEmail = email.trim().toLowerCase();

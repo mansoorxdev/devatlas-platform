@@ -13,12 +13,15 @@ export function GuestRoute() {
   const isLoading = useAuthStore((state) => state.isLoading);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
+  const user = useAuthStore((state) => state.user);
+
   if (isLoading) {
     return <LoadingSpinner className="mt-20" size="lg" />;
   }
 
   if (isAuthenticated) {
-    return <Navigate to={APP_PATHS.ADMIN} replace />;
+    const targetPath = user?.role === 'writer' ? APP_PATHS.WRITER : APP_PATHS.ADMIN;
+    return <Navigate to={targetPath} replace />;
   }
 
   return <Outlet />;

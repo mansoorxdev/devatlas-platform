@@ -121,12 +121,21 @@ export function Navbar() {
                 </button>
               </div>
             ) : (
-              <Link
-                to={APP_PATHS.LOGIN}
-                className="text-xs font-semibold text-slate-500 hover:text-slate-900 dark:hover:text-slate-200 transition-colors"
-              >
-                Sign In
-              </Link>
+              <div className="flex items-center gap-3">
+                <Link
+                  to={APP_PATHS.WRITER_LOGIN}
+                  className="text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 transition-colors"
+                >
+                  Writer Sign In
+                </Link>
+                <Link
+                  to={APP_PATHS.WRITER_REGISTER}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-600 text-white text-xs font-semibold hover:bg-brand-500 transition-colors shadow-sm"
+                >
+                  <PenTool size={13} />
+                  <span>Become a Writer</span>
+                </Link>
+              </div>
             )}
           </div>
 
