@@ -58,6 +58,7 @@ app.use(cookieParser());
 app.use(requestLogger);
 
 // Mount health check & sitemap endpoints BEFORE rate limiting is applied to /api
+app.use('/health', healthRoutes);
 app.use('/api/v1/health', healthRoutes);
 app.use('/sitemap.xml', sitemapRoutes);
 
