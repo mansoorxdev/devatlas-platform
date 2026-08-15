@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
   ARTICLES: '/articles',
   SNIPPETS: '/snippets',
   ERRORS: '/errors',
+  SEARCH: '/search',
 };
 
 export const STORAGE_KEYS = {
